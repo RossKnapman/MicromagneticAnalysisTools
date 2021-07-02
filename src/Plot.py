@@ -3,8 +3,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import discretisedfield as df
-import Read
-import Calculate
+from src import Read
+from src import Calculate
 
 
 def lengthToIdx(length, systemSize, array):

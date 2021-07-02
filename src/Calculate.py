@@ -2,7 +2,7 @@ import numpy as np
 import discretisedfield as df
 import findiff
 
-import Read
+from src import Read
 
 
 def skyrmionNumber(m):

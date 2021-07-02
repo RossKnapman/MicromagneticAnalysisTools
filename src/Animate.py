@@ -5,9 +5,9 @@ from matplotlib import animation
 from matplotlib.patches import Rectangle, Circle
 import discretisedfield as df
 import re
-import Read
-import Plot
-import Calculate
+from src import Read
+from src import Plot
+from src import Calculate
 
 
 def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", outName="Movie.mp4", initialMinValue=0, initialMaxValue=0):

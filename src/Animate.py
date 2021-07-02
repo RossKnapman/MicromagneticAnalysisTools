@@ -68,7 +68,7 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
                                    interval=25, blit=False, save_count=len(quantityArray))
     plt.tight_layout()
 
-    anim.save(outName, fps=25)
+    anim.save(outName, fps=25, writer='ffmpeg')
 
 
 def NskAnimation(NskArray, timeArray):
@@ -266,4 +266,4 @@ def colourAnimation(directory, plotType, zIndex=0, COMArray=None, plotImpurity=F
         else:
             outName = "SkDensity.mp4"
 
-    anim.save(outName, fps=25)
+    anim.save(outName, fps=25, writer='ffmpeg')

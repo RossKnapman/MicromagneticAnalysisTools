@@ -3,15 +3,14 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.patches import Rectangle, Circle
-import discretisedfield as df 
+import discretisedfield as df
 import re
-from .Calculate import NskArray, skyrmionNumberDensity
-from .Read import getFilesToScan, loadFile, sampleExtent, sampleDiscretisation, fileTime
-from .Plot import magnetizationPlot, skyrmionDensityPlot, magnetizationQuiver
+import Read
+import Plot
+import Calculate
 
 
-def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", outName = "Movie.mp4", initialMinValue = 0, initialMaxValue = 0):
-
+def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", outName="Movie.mp4", initialMinValue=0, initialMaxValue=0):
     """ Outputs an animation of a generic quantity (e.g. Nsk, energy, current) over time. The input arrays are to be given as file names, e.g. Nsk.npy, Time.npy. """
 
     t = timeArray * 1e9
@@ -46,96 +45,106 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
             if np.max(quantityArray[:i]) > maxValue:
                 maxValue = np.max(quantityArray[:i])
 
-            quantityText.set_text(quantityTextValue + " = " + quantityTextFormat.format(quantityArray[i]))
+            quantityText.set_text(
+                quantityTextValue + " = " + quantityTextFormat.format(quantityArray[i]))
             quantityText.set_position((0.05 * t[i], 0.3 * maxValue))
             timeText.set_text('t = ' + '{:.2f}'.format(t[i]) + ' ns')
             timeText.set_position((0.05 * t[i], 0.5 * maxValue))
 
         except ValueError:
             pass
-        
+
         ax.set_xlim(t[0], t[i])
         ax.set_ylim(minValue, 1.1*maxValue)
         thePlot.set_data(t[:i+1], quantityArray[:i+1])
-        ax.get_xaxis().set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: '{:.1f}'.format(x))) 
+        ax.get_xaxis().set_major_formatter(
+            mpl.ticker.FuncFormatter(lambda x, p: '{:.1f}'.format(x)))
 
     dataIterator = iter(range(len(quantityArray)))
 
     print("Producing animation", outName)
 
-    anim = animation.FuncAnimation(fig, updateAnim, dataIterator, init_func=init, interval=25, blit=False, save_count=len(quantityArray))
+    anim = animation.FuncAnimation(fig, updateAnim, dataIterator, init_func=init,
+                                   interval=25, blit=False, save_count=len(quantityArray))
     plt.tight_layout()
 
     anim.save(outName, fps=25)
 
 
 def NskAnimation(NskArray, timeArray):
-    oneDQuantity(NskArray, timeArray, "$N_{\mathrm{sk}}$", "$N_{\mathrm{sk}}$", outName = "Nsk.mp4", initialMinValue = -1.1, initialMaxValue = 1.1)
+    oneDQuantity(NskArray, timeArray, r"$N_{\mathrm{sk}}$", r"$N_{\mathrm{sk}}$",
+                 outName="Nsk.mp4", initialMinValue=-1.1, initialMaxValue=1.1)
 
 
 def currentAnimation(currentArray, timeArray, component):
-    oneDQuantity(currentArray, timeArray, "$j_" + component + "$ (A m$^{-2}$)", "$j_" + component + "$", quantityTextFormat = "{:.2e}", outName = "Current" + component + ".mp4", initialMinValue = 0, initialMaxValue = 1)
+    oneDQuantity(currentArray, timeArray, "$j_" + component + "$ (A m$^{-2}$)", "$j_" + component + "$",
+                 quantityTextFormat="{:.2e}", outName="Current" + component + ".mp4", initialMinValue=0, initialMaxValue=1)
 
 
 def energyAnimation(energyArray, timeArray):
-    oneDQuantity(energyArray, timeArray, "$E$ (J)", "$E$", quantityTextFormat = "{:.2e}", outName = "Energy.mp4", initialMinValue = energyArray[0], initialMaxValue = 0.9 * energyArray[0])
+    oneDQuantity(energyArray, timeArray, "$E$ (J)", "$E$",
+                 quantityTextFormat="{:.2e}", outName="Energy.mp4", initialMinValue=energyArray[0], initialMaxValue=0.9 * energyArray[0])
 
 
-def colourAnimation(directory, plotType, zIndex = 0, COMArray = None, plotImpurity = False, plotPinning = False, showComponent = True, quiver = False, step = 1, showFromX = None, showToX = None, showFromY = None, showToY = None, edgeCutXFrac = None, edgeCutYFrac = None,
-startXFrac = None, endXFrac = None, startYFrac = None, endYFrac = None, startFile = None, endFile = None, lengthUnits=None, **kwargs):
-
+def colourAnimation(directory, plotType, zIndex=0, COMArray=None, plotImpurity=False, plotPinning=False, showComponent=True, quiver=False, step=1, showFromX=None, showToX=None, showFromY=None, showToY=None, edgeCutXFrac=None, edgeCutYFrac=None,
+                    startXFrac=None, endXFrac=None, startYFrac=None, endYFrac=None, startFile=None, endFile=None, lengthUnits=None, **kwargs):
     """ Create an animation of a 2D scalar field. """
 
     # A lot of this code could probably be merged with the skyrmion density animation plot to make it more modular
 
-    filesToScan = getFilesToScan(directory, startFile, endFile)
+    filesToScan = Read.getFilesToScan(directory, startFile, endFile)
     assert (len(filesToScan) != 0)
 
     component = kwargs.get('component')
-    if plotType == 'magnetization': assert component == 'x' or component == 'y' or component == 'z'
+    if plotType == 'magnetization':
+        assert component == 'x' or component == 'y' or component == 'z'
 
     fig, ax = plt.subplots()
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-
     # Correct centre of mass array start is startFile is not the first file
-    if startFile: correctedIdx = int(re.findall(r'\d+', startFile)[0])
-
+    if startFile:
+        correctedIdx = int(re.findall(r'\d+', startFile)[0])
 
     if plotType == 'magnetization':
-        thePlot = magnetizationPlot(directory, component, filesToScan[0], zIndex, plotImpurity, plotPinning, showComponent, ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
+        thePlot = Plot.magnetizationPlot(directory, component, filesToScan[0], zIndex, plotImpurity, plotPinning,
+                                         showComponent, ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
         comColour = 'green'
-        boxColour = 'lime'
 
     elif plotType == 'magnetizationHSL':
-        thePlot = magnetizationPlotHSL(directory, component, filesToScan[0], zIndex, plotImpurity, plotPinning, showComponent, ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
+        thePlot = Plot.magnetizationPlotHSL(directory, component, filesToScan[0], zIndex, plotImpurity, plotPinning,
+                                            showComponent, ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
         comColour = 'green'
-        boxColour = 'lime'
 
     elif plotType == 'skyrmionDensity':
-        thePlot = skyrmionDensityPlot(directory, filesToScan[0], zIndex, plotImpurity, plotPinning, ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
+        thePlot = Plot.skyrmionDensityPlot(directory, filesToScan[0], zIndex, plotImpurity, plotPinning,
+                                           ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
         comColour = 'red'
-        boxColour = 'red'
 
-    if quiver: quiverPlot = magnetizationQuiver(directory, filesToScan[0], ax=ax, step=step, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
+    if quiver:
+        quiverPlot = Plot.magnetizationQuiver(
+            directory, filesToScan[0], ax=ax, step=step, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
 
     if COMArray:
         comArray = np.load(COMArray)
-        comTracer = Circle((comArray[0, 0], comArray[0, 1]), 10, color=comColour, alpha=0.8)
+        comTracer = Circle(
+            (comArray[0, 0], comArray[0, 1]), 10, color=comColour, alpha=0.8)
         ax.add_patch(comTracer)
 
-    Lx, Ly = sampleExtent(directory)
+    Lx, Ly = Read.sampleExtent(directory)
 
     if showFromX:
-        fileText = ax.text(0.5 * (showToX - showFromX) + showFromX, 1.1 * (showToY - showFromY) + showFromY, "")
-        timeText = ax.text(showFromX, 1.1 * (showToY - showFromY) + showFromY, "")
+        fileText = ax.text(0.5 * (showToX - showFromX) + showFromX,
+                           1.1 * (showToY - showFromY) + showFromY, "")
+        timeText = ax.text(
+            showFromX, 1.1 * (showToY - showFromY) + showFromY, "")
 
     else:
         fileText = ax.text(0.5*Lx, 1.1*Ly, "")
         timeText = ax.text(0, 1.1*Ly, "")
-    
+
     if edgeCutXFrac and edgeCutYFrac:
         startXFrac = edgeCutXFrac
         endXFrac = 1. - edgeCutXFrac
@@ -143,9 +152,10 @@ startXFrac = None, endXFrac = None, startYFrac = None, endYFrac = None, startFil
         endYFrac = 1. - edgeCutYFrac
 
     if startXFrac and endXFrac and startYFrac and endYFrac:
-        rect = Rectangle((startXFrac * Lx, startYFrac * Ly), (endXFrac - startXFrac) * Lx, (endYFrac - startYFrac) * Ly, fill=False, color='lime', lw=2)
+        rect = Rectangle((startXFrac * Lx, startYFrac * Ly), (endXFrac - startXFrac)
+                         * Lx, (endYFrac - startYFrac) * Ly, fill=False, color='lime', lw=2)
         ax.add_patch(rect)
-    
+
     def init():
         pass
 
@@ -156,10 +166,11 @@ startXFrac = None, endXFrac = None, startYFrac = None, endYFrac = None, startFil
         fullFile = directory + '/' + filesToScan[i]
 
         fileText.set_text('File: ' + filesToScan[i])
-        timeText.set_text('$t$ = ' + "{:.2f}".format(fileTime(fullFile) * 1e9) + " ns")
+        timeText.set_text(
+            '$t$ = ' + "{:.2f}".format(Read.fileTime(fullFile) * 1e9) + " ns")
 
         if plotType == 'magnetization' or plotType == 'magnetizationHSL':
-            mArray = loadFile(fullFile, component, zIndex)
+            mArray = Read.loadFile(fullFile, component, zIndex)
 
         elif plotType == 'skyrmionDensity':
             mArray = df.Field.fromfile(fullFile).array[:, :, zIndex]
@@ -172,35 +183,33 @@ startXFrac = None, endXFrac = None, startYFrac = None, endYFrac = None, startFil
             startYIdx = int(np.round((showFromY / Ly) * mArray.shape[1]))
             endYIdx = int(np.round((showToY / Ly) * mArray.shape[1]))
             mArray = mArray[startXIdx:endXIdx, startYIdx:endYIdx]
-        
+
         if quiver:
             mArrayQuiver = df.Field.fromfile(fullFile).array[:, :, zIndex, :]
-            mArrayQuiver = mArrayQuiver.reshape(mArrayQuiver.shape[0], mArrayQuiver.shape[1], 3)
-            
-            if showFromX:
-                mArrayQuiver = mArrayQuiver[startXIdx:endXIdx, startYIdx:endYIdx]
-                x = np.linspace(showFromX, showToX, mArrayQuiver.shape[1])
-                y = np.linspace(showFromY, showToY, mArrayQuiver.shape[0])
-            
-            else:
-                x = np.linspace(0, Lx, mArrayQuiver.shape[0])
-                y = np.linspace(0, Ly, mArrayQuiver.shape[1])
+            mArrayQuiver = mArrayQuiver.reshape(
+                mArrayQuiver.shape[0], mArrayQuiver.shape[1], 3)
 
-            X, Y = np.meshgrid(x, y)
-            quiverPlot.set_UVC(mArrayQuiver[::step, ::step, 0].transpose(), mArrayQuiver[::step, ::step, 1].transpose())
+            if showFromX:
+                mArrayQuiver = mArrayQuiver[startXIdx:endXIdx,
+                                            startYIdx:endYIdx]
+
+            quiverPlot.set_UVC(mArrayQuiver[::step, ::step, 0].transpose(
+            ), mArrayQuiver[::step, ::step, 1].transpose())
 
         if plotType == 'magnetization' or plotType == 'magnetizationHSL':
             thePlot.set_array(mArray.transpose())
 
         elif plotType == 'skyrmionDensity':
-            dx, dy, dz = sampleDiscretisation(directory)
-            thePlot.set_array(skyrmionNumberDensity(mArray, dx, dy, lengthUnits).transpose())
+            dx, dy = Read.sampleDiscretisation(directory)[:2]
+            thePlot.set_array(Calculate.skyrmionNumberDensity(
+                mArray, dx, dy, lengthUnits).transpose())
 
         comIdx = i
-        
+
         if COMArray:
 
-            if startFile: comIdx = i + correctedIdx
+            if startFile:
+                comIdx = i + correctedIdx
 
             tracerX, tracerY = comArray[comIdx]
 
@@ -219,10 +228,10 @@ startXFrac = None, endXFrac = None, startYFrac = None, endYFrac = None, startFil
 
             comTracer.center = [tracerX, tracerY]
 
-
     dataIterator = iter(range(len(filesToScan)))
 
-    anim = animation.FuncAnimation(fig, updateAnim, dataIterator, init_func=init, interval=25, blit=False, save_count=len(filesToScan))
+    anim = animation.FuncAnimation(
+        fig, updateAnim, dataIterator, init_func=init, interval=25, blit=False, save_count=len(filesToScan))
 
     if plotType == 'magnetization':
         if startFile or showFromX:
@@ -244,7 +253,7 @@ startXFrac = None, endXFrac = None, startYFrac = None, endYFrac = None, startFil
         if startFile or showFromX:
             # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
             outName = "SkDensityPart.mp4"
-        
+
         else:
             outName = "SkDensity.mp4"
 

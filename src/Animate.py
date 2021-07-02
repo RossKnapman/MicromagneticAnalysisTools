@@ -114,6 +114,7 @@ def colourAnimation(directory, plotType, zIndex=0, COMArray=None, plotImpurity=F
         comColour = 'green'
 
     elif plotType == 'magnetizationHSL':
+        showComponent = False
         thePlot = Plot.magnetizationPlotHSL(directory, component, filesToScan[0], zIndex, plotImpurity, plotPinning,
                                             showComponent, ax=ax, showFromX=showFromX, showToX=showToX, showFromY=showFromY, showToY=showToY)
         comColour = 'green'
@@ -169,8 +170,11 @@ def colourAnimation(directory, plotType, zIndex=0, COMArray=None, plotImpurity=F
         timeText.set_text(
             '$t$ = ' + "{:.2f}".format(Read.fileTime(fullFile) * 1e9) + " ns")
 
-        if plotType == 'magnetization' or plotType == 'magnetizationHSL':
+        if plotType == 'magnetization':
             mArray = Read.loadFile(fullFile, component, zIndex)
+
+        elif plotType == 'magnetizationHSL':
+            mArray = df.Field.fromfile(fullFile).array[:, :, zIndex, :]
 
         elif plotType == 'skyrmionDensity':
             mArray = df.Field.fromfile(fullFile).array[:, :, zIndex]
@@ -196,8 +200,13 @@ def colourAnimation(directory, plotType, zIndex=0, COMArray=None, plotImpurity=F
             quiverPlot.set_UVC(mArrayQuiver[::step, ::step, 0].transpose(
             ), mArrayQuiver[::step, ::step, 1].transpose())
 
-        if plotType == 'magnetization' or plotType == 'magnetizationHSL':
+        if plotType == 'magnetization':
             thePlot.set_array(mArray.transpose())
+
+        elif plotType == 'magnetizationHSL':
+            rgbArray = Plot.vecToRGB(mArray)
+            print(rgbArray.transpose(1, 0, 2).shape)
+            thePlot.set_array(rgbArray.transpose(1, 0, 2))
 
         elif plotType == 'skyrmionDensity':
             dx, dy = Read.sampleDiscretisation(directory)[:2]
@@ -244,10 +253,10 @@ def colourAnimation(directory, plotType, zIndex=0, COMArray=None, plotImpurity=F
     elif plotType == 'magnetizationHSL':
         if startFile or showFromX:
             # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
-            outName = "mHSL" + component + "Part" + ".mp4"
+            outName = "mHSLPart.mp4"
 
         else:
-            outName = "mHSL" + component + ".mp4"
+            outName = "mHSL.mp4"
 
     elif plotType == 'skyrmionDensity':
         if startFile or showFromX:

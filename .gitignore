@@ -11,3 +11,8 @@ htmlcov/*
 
 # Virtual environment
 venv
+.venv
+.env
+
+# macOS files
+*.DS_Store

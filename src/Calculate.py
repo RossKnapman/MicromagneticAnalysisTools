@@ -11,7 +11,7 @@ def skyrmionNumber(m):
 
     mdx = np.diff(m, axis=0)[:, :-1]
     mdy = np.diff(m, axis=1)[:-1, :]
-    mReduced = m[:-1, :-1, :-1]
+    mReduced = m[:-1, :-1, :]
     #  Element-wise dot product
     toSum = np.einsum('ijk,ijk->ij', mReduced, np.cross(mdx, mdy))
     return (1 / (4 * np.pi)) * np.sum(toSum)

@@ -4,3 +4,7 @@
 *.mp4
 *.npy
 *.png
+
+# Test coverage
+htmlcov/*
+.coverage

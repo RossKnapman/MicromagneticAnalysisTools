@@ -4,18 +4,16 @@ import discretisedfield as df
 import numpy as np
 import warnings
 
-
 # Note: The "directory" argument is usually /path/to/Data
 
 
 def getInitialFile(directory):
-
     """ Get the name of the intial file of the simulation (as I call them different things: Relaxed.ovf, and m000000.ovf). """
 
     if os.path.isfile(directory + "/Relaxed.ovf"):
         return directory + "/Relaxed.ovf"
-    
-    elif os.path.isfile (directory + "/m000000.ovf"):
+
+    elif os.path.isfile(directory + "/m000000.ovf"):
         return directory + "/m000000.ovf"
 
     else:
@@ -27,22 +25,22 @@ def getInitialFile(directory):
                 break
 
         try:
-            warnings.warn('Using random file from directory as no initial file found.')
+            warnings.warn(
+                'Using random file from directory as no initial file found.')
             return directory + '/' + initialFile
 
         except UnboundLocalError:
             raise FileNotFoundError('No ovf files found.')
 
 
-def simulationTimeArray(directory, loadMethod = "table", startFile = None, endFile = None):
-
+def simulationTimeArray(directory, loadMethod="table", startFile=None, endFile=None):
     """ Reads the time of a simulation and outputs an array. We can either do this by loading the table output by the MuMax, or we can obtain the timestamp of each file in the simulation. """
 
     if startFile:
         loadMethod = "files"
-    
+
     if loadMethod == "table":  # This method is much faster
-        
+
         df = pd.read_csv(directory + '/table.txt', delimiter='\t')
         timeArray = df['# t (s)'].to_numpy()
 
@@ -62,27 +60,25 @@ def simulationTimeArray(directory, loadMethod = "table", startFile = None, endFi
 
 
 def simulationCurrentArray(directory, component):
-
     """ Reads the current of a simulation and outputs an array. Component can be x, y, z. """
-    
+
     df = pd.read_csv(directory + '/table.txt', delimiter='\t')
-    currentArray = -df['J' + component + ' (A/m2)'].to_numpy()  # Negative as the electron charge is negative
+    # Negative as the electron charge is negative
+    currentArray = -df['J' + component + ' (A/m2)'].to_numpy()
 
     return currentArray
 
 
 def simulationEnergyArray(directory):
-
     """ Read the energy fo a simulation and outputs an array. """
 
     df = pd.read_csv(directory + '/table.txt', delimiter='\t')
     energyArray = df['E_total (J)'].to_numpy()
-    
+
     return energyArray
 
 
 def fileTime(file):
-
     """ Reads the total simulation time given the name of a .ovf file. """
 
     with open(file, "rb") as ovffile:
@@ -96,7 +92,6 @@ def fileTime(file):
 
 
 def getFilesToScan(directory, startFile=None, endFile=None):
-
     """ Outputs a sorted list of .ovf files which are to be parsed. """
 
     filesToScan = []
@@ -106,7 +101,7 @@ def getFilesToScan(directory, startFile=None, endFile=None):
             filesToScan.append(file)
 
     filesToScan = sorted(filesToScan)
-    
+
     if startFile and endFile:
 
         startIdx = filesToScan.index(startFile)
@@ -120,25 +115,27 @@ def getFilesToScan(directory, startFile=None, endFile=None):
 
 
 def sampleDiscretisation(directory):
-
     """ Get spatial extent of the sample in nm. """
 
     initialFile = getInitialFile(directory)
-    
+
     with open(initialFile, 'rb') as f:
         for i in range(26):
             f.readline()
-            if i == 22:  # Loop through the header of the file
-                dx = float(str(f.readline()).split('stepsize: ')[1].split('\\n')[0])
-                dy = float(str(f.readline()).split('stepsize: ')[1].split('\\n')[0])
-                dz = float(str(f.readline()).split('stepsize: ')[1].split('\\n')[0])
+            if i == 22:  #  Loop through the header of the file
+                dx = float(str(f.readline()).split(
+                    'stepsize: ')[1].split('\\n')[0])
+                dy = float(str(f.readline()).split(
+                    'stepsize: ')[1].split('\\n')[0])
+                dz = float(str(f.readline()).split(
+                    'stepsize: ')[1].split('\\n')[0])
 
     return dx, dy, dz
 
 
 def sampleExtent(directory):
 
-    dx, dy, dz = sampleDiscretisation(directory)
+    dx, dy = sampleDiscretisation(directory)[:2]
     mInit = initialFileArray(directory)
 
     Lx = dx * mInit.shape[0] * 1e9
@@ -149,7 +146,6 @@ def sampleExtent(directory):
 
 
 def initialFileArray(directory):
-
     """ Get the initial .ovf file of the simulation as a numpy array. """
 
     initialFile = getInitialFile(directory)
@@ -165,7 +161,7 @@ def loadFile(inFile, component, zIndex):
 
     if component == 'x':
         return df.Field.fromfile(inFile).array[:, :, zIndex, 0]
-        
+
     elif component == 'y':
         return df.Field.fromfile(inFile).array[:, :, zIndex, 1]
 

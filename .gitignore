@@ -1,6 +1,18 @@
 *.pyc
 *.json
-*.ovf
+# *.ovf
 *.mp4
 *.npy
 *.png
+
+# Test coverage
+htmlcov/*
+.coverage
+
+# Virtual environment
+venv
+.venv
+.env
+
+# macOS files
+*.DS_Store

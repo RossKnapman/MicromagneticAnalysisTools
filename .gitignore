@@ -1,6 +1,6 @@
 *.pyc
 *.json
-*.ovf
+# *.ovf
 *.mp4
 *.npy
 *.png

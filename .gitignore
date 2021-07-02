@@ -8,3 +8,6 @@
 # Test coverage
 htmlcov/*
 .coverage
+
+# Virtual environment
+venv

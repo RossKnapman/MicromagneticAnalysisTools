@@ -38,63 +38,6 @@ def getPinningArray(directory):
     return pinningArray
 
 
-def magnetizationQuiver(directory, theFile, zIndex=0, ax=None, step=1, quiverColour='black', **kwargs):
-    """ Produce a quiver plot of the in-plane component of magnetization. """
-
-    if ax is None:
-        ax = plt.subplots()[1]
-
-    fullFile = directory + '/' + theFile
-
-    Lx, Ly = Read.sampleExtent(directory)
-
-    # If supplied, cut the plot to show only a certain subset, according to the desired size in metres
-    showFromX = kwargs.get('showFromX', None)
-    showToX = kwargs.get('showToX', None)
-    showFromY = kwargs.get('showFromY', None)
-    showToY = kwargs.get('showToY', None)
-
-    fullFile = directory + '/' + theFile
-    mArray = df.Field.fromfile(fullFile).array[:, :, zIndex, :]
-    mArray = mArray.reshape(mArray.shape[0], mArray.shape[1], 3)
-
-    if showFromX:
-
-        startXIdx = int(np.round((showFromX / Lx) * mArray.shape[0]))
-        endXIdx = int(np.round((showToX / Lx) * mArray.shape[0]))
-        startYIdx = int(np.round((showFromY / Ly) * mArray.shape[1]))
-        endYIdx = int(np.round((showToY / Ly) * mArray.shape[1]))
-
-        mArray = mArray[startXIdx:endXIdx, startYIdx:endYIdx]
-        x = np.linspace(showFromY, showToY, mArray.shape[1])
-        y = np.linspace(showFromX, showToX, mArray.shape[0])
-
-    else:
-
-        x = np.linspace(0, Lx, mArray.shape[0])
-        y = np.linspace(0, Ly, mArray.shape[1])
-
-    X, Y = np.meshgrid(x, y)
-    X = X[::step, ::step]
-    Y = Y[::step, ::step]
-
-    mArray = mArray[::step, ::step, :]
-    alphaArray = np.ones((mArray.shape[0], mArray.shape[1], 4))
-    alphaArray[:, :, 3] = np.sqrt(mArray[:, :, 0]**2 + mArray[:, :, 1]**2)
-    alphaArray = alphaArray / np.max(alphaArray)
-    alphaArray = alphaArray.transpose(1, 0, 2)
-    alphaArray = np.interp(alphaArray, (0.4, np.max(alphaArray)), (0, 1))
-
-    thePlot = ax.quiver(Y.transpose(), X.transpose(), mArray[:, :, 0].transpose(), mArray[:, :, 1].transpose(), color=np.reshape(
-        alphaArray, (mArray.shape[0] * mArray.shape[1], 4)), units='xy', scale_units='xy', pivot='mid', headwidth=6, headlength=10, headaxislength=10, linewidth=10)
-    # thePlot = ax.quiver(Y[::step, ::step].transpose(), X[::step, ::step].transpose(), (mArray[:, :, 0] / np.sqrt(mArray[:, :, 0]**2 + mArray[:, :, 1]**2)).transpose(), (mArray[:, :, 1] / np.sqrt(mArray[:, :, 0]**2 + mArray[:, :, 1]**2)).transpose(), color=np.reshape(alphaArray, (mArray.shape[0] * mArray.shape[1], 4)), scale=50, pivot='mid')
-
-    ax.set_xlabel(r"$x$ (nm)")
-    ax.set_ylabel(r"$y$ (nm)")
-
-    return thePlot
-
-
 def vecToRGB(m):
     """ Vectorised version of colorsys.hls_to_rgb """
 
@@ -175,7 +118,10 @@ class ColourPlotter:
     plot_pinning=False,
     show_component=False,
     interpolation=None,
-    limits=None):
+    limits=None,
+    length_units=None,
+    step=1,
+    quiver_colour='black'):
         self.plot_type = plot_type
         self.directory = directory
         self.plot_file = plot_file
@@ -187,7 +133,8 @@ class ColourPlotter:
         self.show_component = show_component
         self.interpolation = interpolation
         self.limits = limits
-        self.length_units=None
+        self.length_units = length_units
+        self.step = step 
 
         self.Lx, self.Ly = Read.sampleExtent(self.directory)
         self.m_array = df.Field.fromfile(self.directory + '/' + self.plot_file).array
@@ -252,6 +199,28 @@ class ColourPlotter:
         self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
             origin='lower', cmap='PRGn', interpolation=self.interpolation, extent=self.limits_indices)
 
+    def _plot_quiver(self):
+
+        x = np.linspace(0, self.Lx, self.m_array.shape[0])
+        y = np.linspace(0, self.Ly, self.m_array.shape[1])
+        X, Y = np.meshgrid(x, y)
+
+        X = X[::self.step, ::self.step]
+        Y = Y[::self.step, ::self.step]
+
+        magnetization_array = self.m_array[::self.step, ::self.step, self.z_index, :]
+
+        # Control transparency of arrows
+        alphaArray = np.ones((magnetization_array.shape[0], magnetization_array.shape[1], 4))
+        alphaArray[:, :, 3] = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2)
+        alphaArray = alphaArray / np.max(alphaArray)
+        alphaArray = alphaArray.transpose(1, 0, 2)
+        alphaArray = np.interp(alphaArray, (0.4, np.max(alphaArray)), (0, 1))
+
+        thePlot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose(),
+            magnetization_array[:, :, 1].transpose(), color=np.reshape(alphaArray, (magnetization_array.shape[0] * magnetization_array.shape[1], 4)),
+            units='xy', scale_units='xy', pivot='mid', headwidth=6, headlength=10, headaxislength=10, linewidth=10)
+
     def _plot_impurity(self):
         impurity_array = np.flip(getImpurityArray(self.directory, np.array([0, 1, 0, 0.2]), self.z_index)[
 self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.limits_indices[3]].transpose(1, 0, 2), axis=0)
@@ -273,6 +242,9 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         elif self.plot_type == 'skyrmion_density':
             self._plot_skyrmion_density()
 
+        elif self.plot_type == 'quiver':
+            self._plot_quiver()
+
         else:
             raise ValueError('Plot type must be one of: magnetization, magnetization_single_component, \
                 skyrmion_density.')
@@ -280,8 +252,8 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         if self.plot_impurity: self._plot_impurity()
         if self.plot_pinning: self._plot_pinning()
 
-        self.ax.set_xlabel(r"$x$ (nm)")
-        self.ax.set_ylabel(r"$y$ (nm)")
+        self.ax.set_xlabel(r'$x$ (nm)')
+        self.ax.set_ylabel(r'$y$ (nm)')
 
 
 def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMFileName='COM.npy', ax=None, presentationMethod='legend', showStopRamp=False, timeMultiplier=None, speedMultiplier=None, currentMultiplier=None, colorbarLabel=None):

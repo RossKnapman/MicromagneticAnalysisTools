@@ -162,207 +162,126 @@ def vecToRGB(m):
 
     return rgbArray
 
+class ColourPlotter:
 
-def magnetizationPlotHSL(directory, component, theFile, zIndex=0, plotImpurity=False, plotPinning=False, showComponent=True, interpolation=None, ax=None, **kwargs):
-    """ Produces a colour plot (imshow) of the magnetization with component x, y, or z, corresponding to mx, my, mz. """
+    def __init__(self,
+    plot_type,
+    directory,
+    plot_file,
+    ax=None,
+    z_index=0,
+    component=None,
+    plot_impurity=False,
+    plot_pinning=False,
+    show_component=False,
+    interpolation=None,
+    limits=None):
+        self.plot_type = plot_type
+        self.directory = directory
+        self.plot_file = plot_file
+        self.ax = ax
+        self.z_index = z_index
+        self.component = component
+        self.plot_impurity = plot_impurity
+        self.plot_pinning = plot_pinning
+        self.show_component = show_component
+        self.interpolation = interpolation
+        self.limits = limits
+        self.length_units=None
 
-    if ax == None:
-        ax = plt.subplots()[1]
+        self.Lx, self.Ly = Read.sampleExtent(self.directory)
+        self.m_array = df.Field.fromfile(self.directory + '/' + self.plot_file).array
+        self.limits_indices = self._get_limits_indices()
+        
+        self.m_array = self.m_array[self.limits_indices[0]: self.limits_indices[1],
+            self.limits_indices[2]: self.limits_indices[3]]
 
-    Lx, Ly = Read.sampleExtent(directory)
+        if self.ax == None:
+            self.ax = plt.subplots()[1]
 
-    # If supplied, cut the plot to show only a certain subset, according to the desired size in metres
-    showFromX = kwargs.get('showFromX', None)
-    showToX = kwargs.get('showToX', None)
-    showFromY = kwargs.get('showFromY', None)
-    showToY = kwargs.get('showToY', None)
+    def _get_limits_indices(self):
 
-    mArray = df.Field.fromfile(
-        directory + '/' + theFile).array[:, :, zIndex, :]
-    rgbArray = vecToRGB(mArray)
+        try:
+            start_x_idx = int(np.round((self.limits[0]/ self.Lx) * self.m_array.shape[0]))
+            end_x_idx = int(np.round((self.limits[1] / self.Lx) * self.m_array.shape[0]))
+            start_y_idx = int(np.round((self.limits[2]/ self.Ly) * self.m_array.shape[1]))
+            end_y_idx  = int(np.round((self.limits[3] / self.Ly) * self.m_array.shape[1]))
+        
+        except TypeError:
+            start_x_idx = 0
+            end_x_idx = self.m_array.shape[0]
+            start_y_idx = 0
+            end_y_idx = self.m_array.shape[1]
 
-    if showFromX:
+        return [start_x_idx, end_x_idx, start_y_idx, end_y_idx]
 
-        startXIdx = int(np.round((showFromX / Lx) * mArray.shape[0]))
-        endXIdx = int(np.round((showToX / Lx) * mArray.shape[0]))
-        startYIdx = int(np.round((showFromY / Ly) * mArray.shape[1]))
-        endYIdx = int(np.round((showToY / Ly) * mArray.shape[1]))
+    def _plot_magnetization(self):
+        
+        magnetization_array = self.m_array[:, :, self.z_index, :]
+        plot_array = vecToRGB(magnetization_array).transpose(1, 0, 2)
+        self.ax.imshow(plot_array, animated=True, origin='lower',
+            interpolation=self.interpolation, extent=self.limits_indices)
 
-        rgbArray = rgbArray[startXIdx:endXIdx, startYIdx:endYIdx]
-        thePlot = ax.imshow(rgbArray.transpose(1, 0, 2), animated=True, origin='lower',
-                            interpolation=interpolation, extent=(showFromX, showToX, showFromY, showToY))
+    def _plot_magnetization_single_component(self):
 
-        # I have no bloody clue why the impurity and pinning arrays need to be flipped in y to match with the magnetization array but they do
-        if plotImpurity:
-            impurityArray = np.flip(getImpurityArray(directory, np.array([0, 0, 0, 0.1]), zIndex)[
-                                    startXIdx:endXIdx, startYIdx:endYIdx].transpose(1, 0, 2), axis=0)
-            ax.imshow(impurityArray, extent=(
-                showFromX, showToX, showFromY, showToY))
+        if self.component == 'x':
+            plot_array = self.m_array[:, :, self.z_index, 0]
 
-        if plotPinning:
-            pinningArray = np.flip(getPinningArray(directory)[
-                                   startXIdx:endXIdx, startYIdx:endYIdx].transpose(1, 0, 2), axis=0)
-            ax.imshow(pinningArray, extent=(
-                showFromX, showToX, showFromY, showToY))
+        elif self.component == 'y':
+            plot_array = self.m_array[:, :, self.z_index, 1]
 
-    else:
+        elif self.component == 'z':
+            plot_array = self.m_array[:, :, self.z_index, 2]
 
-        thePlot = ax.imshow(rgbArray.transpose(1, 0, 2), animated=True,
-                            origin='lower', interpolation=interpolation, extent=(0, Lx, 0, Ly))
-        if plotImpurity:
-            impurityArray = np.flip(getImpurityArray(directory, np.array(
-                [0, 1, 0, 0.2]), zIndex).transpose(1, 0, 2), axis=0)
-            ax.imshow(impurityArray, extent=(0, Lx, 0, Ly))
+        self.ax.imshow(plot_array.transpose(), animated=True, vmin=-1, vmax=1, origin='lower',
+            cmap='RdBu_r', interpolation=self.interpolation, extent=self.limits_indices)
 
-        if plotPinning:
-            pinningArray = np.flip(getPinningArray(
-                directory).transpose(1, 0, 2), axis=0)
-            ax.imshow(pinningArray, extent=(0, Lx, 0, Ly))
+        if self.show_component:
+            self.ax.text(self.Lx + 5, 0, "$m_" + self.component + "$")
 
-    ax.set_xlabel(r"$x$ (nm)")
-    ax.set_ylabel(r"$y$ (nm)")
-    if showComponent:
-        ax.text(Lx + 5, 0, "$m_" + component + "$")
+    def _plot_skyrmion_density(self):
 
-    return thePlot
+        magnetization_array = self.m_array[:, :, self.z_index].reshape\
+            (self.m_array.shape[0], self.m_array.shape[1], 3)
 
+        dx, dy = Read.sampleDiscretisation(self.directory)[:2]
 
-def magnetizationPlot(directory, component, theFile, zIndex=0, plotImpurity=False, plotPinning=False, showComponent=True, interpolation=None, ax=None, **kwargs):
-    """ Produces a colour plot (imshow) of the magnetization with component x, y, or z, corresponding to mx, my, mz. """
+        skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).transpose()
+        colour_map_max = np.max(np.abs(skyrmion_density_array))
 
-    if ax == None:
-        ax = plt.subplots()[1]
+        self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
+            origin='lower', cmap='PRGn', interpolation=self.interpolation, extent=self.limits_indices)
 
-    fullFile = directory + '/' + theFile
+    def _plot_impurity(self):
+        impurity_array = np.flip(getImpurityArray(self.directory, np.array([0, 1, 0, 0.2]), self.z_index)[
+self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.limits_indices[3]].transpose(1, 0, 2), axis=0)
+        self.ax.imshow(impurity_array, extent=self.limits_indices)
 
-    Lx, Ly = Read.sampleExtent(directory)
+    def _plot_pinning(self):
+        pinning_array = np.flip(getPinningArray(self.directory)[
+self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.limits_indices[3]].transpose(1, 0, 2), axis=0)
+        self.ax.imshow(pinning_array, extent=self.limits_indices)
 
-    # If supplied, cut the plot to show only a certain subset, according to the desired size in metres
-    showFromX = kwargs.get('showFromX', None)
-    showToX = kwargs.get('showToX', None)
-    showFromY = kwargs.get('showFromY', None)
-    showToY = kwargs.get('showToY', None)
+    def plot(self):
 
-    mArray = Read.loadFile(fullFile, component, zIndex)
+        if self.plot_type == 'magnetization':
+            self._plot_magnetization()
 
-    if showFromX:
+        elif self.plot_type == 'magnetization_single_component':
+            self._plot_magnetization_single_component()
 
-        startXIdx = int(np.round((showFromX / Lx) * mArray.shape[0]))
-        endXIdx = int(np.round((showToX / Lx) * mArray.shape[0]))
-        startYIdx = int(np.round((showFromY / Ly) * mArray.shape[1]))
-        endYIdx = int(np.round((showToY / Ly) * mArray.shape[1]))
+        elif self.plot_type == 'skyrmion_density':
+            self._plot_skyrmion_density()
 
-        mArray = mArray[startXIdx:endXIdx, startYIdx:endYIdx]
-        thePlot = ax.imshow(mArray.transpose(), animated=True, vmin=-1, vmax=1, origin="lower",
-                            cmap="RdBu_r", interpolation=interpolation, extent=(showFromX, showToX, showFromY, showToY))
+        else:
+            raise ValueError('Plot type must be one of: magnetization, magnetization_single_component, \
+                skyrmion_density.')
 
-        # I have no bloody clue why the impurity and pinning arrays need to be flipped in y to match with the magnetization array but they do
-        if plotImpurity:
-            impurityArray = np.flip(getImpurityArray(directory, np.array([0, 1, 0, 0.2]), zIndex)[
-                                    startXIdx:endXIdx, startYIdx:endYIdx].transpose(1, 0, 2), axis=0)
-            ax.imshow(impurityArray, extent=(
-                showFromX, showToX, showFromY, showToY))
+        if self.plot_impurity: self._plot_impurity()
+        if self.plot_pinning: self._plot_pinning()
 
-        if plotPinning:
-            pinningArray = np.flip(getPinningArray(directory)[
-                                   startXIdx:endXIdx, startYIdx:endYIdx].transpose(1, 0, 2), axis=0)
-            ax.imshow(pinningArray, extent=(
-                showFromX, showToX, showFromY, showToY))
-
-    else:
-
-        thePlot = ax.imshow(mArray.transpose(), animated=True, vmin=-1, vmax=1, origin="lower",
-                            cmap="RdBu_r", interpolation=interpolation, extent=(0, Lx, 0, Ly))
-        if plotImpurity:
-            impurityArray = np.flip(getImpurityArray(directory, np.array(
-                [0, 1, 0, 0.2]), zIndex).transpose(1, 0, 2), axis=0)
-            ax.imshow(impurityArray, extent=(0, Lx, 0, Ly))
-
-        if plotPinning:
-            pinningArray = np.flip(getPinningArray(
-                directory).transpose(1, 0, 2), axis=0)
-            ax.imshow(pinningArray, extent=(0, Lx, 0, Ly))
-
-    ax.set_xlabel(r"$x$ (nm)")
-    ax.set_ylabel(r"$y$ (nm)")
-    if showComponent:
-        ax.text(Lx + 5, 0, "$m_" + component + "$")
-
-    return thePlot
-
-
-def skyrmionDensityPlot(directory, theFile, zIndex=0, plotImpurity=False, plotPinning=False, interpolation=None, ax=None, maxSkyrmionDensity=None, lengthUnits=None, **kwargs):
-    """ Return the plot of the skyrmion number density. """
-
-    if ax == None:
-        ax = plt.subplots()[1]
-
-    fullFile = directory + '/' + theFile
-
-    Lx, Ly = Read.sampleExtent(directory)
-    dx, dy = Read.sampleDiscretisation(directory)[:2]
-
-    # If supplied, cut the plot to show only a certain subset, according to the desired size in metres
-    showFromX = kwargs.get('showFromX', None)
-    showToX = kwargs.get('showToX', None)
-    showFromY = kwargs.get('showFromY', None)
-    showToY = kwargs.get('showToY', None)
-
-    mArray = df.Field.fromfile(fullFile).array[:, :, zIndex]
-    mArray = mArray.reshape(mArray.shape[0], mArray.shape[1], 3)
-    rhoSkArray = Calculate.skyrmionNumberDensity(mArray, dx, dy, lengthUnits)
-
-    if maxSkyrmionDensity:
-        colourMapMax = maxSkyrmionDensity
-
-    else:
-        # For normalisation of the colour map such that white corresponds to zero skyrmion density
-        colourMapMax = np.max(np.abs(rhoSkArray))
-
-    print(np.max(np.abs(rhoSkArray)))
-
-    if showFromX:
-
-        startXIdx = int(np.round((showFromX / Lx) * mArray.shape[0]))
-        endXIdx = int(np.round((showToX / Lx) * mArray.shape[0]))
-        startYIdx = int(np.round((showFromY / Ly) * mArray.shape[1]))
-        endYIdx = int(np.round((showToY / Ly) * mArray.shape[1]))
-
-        rhoSkArray = rhoSkArray[startXIdx:endXIdx, startYIdx:endYIdx]
-        thePlot = ax.imshow(rhoSkArray.transpose(), animated=True, vmin=-1*colourMapMax, vmax=colourMapMax,
-                            origin="lower", cmap="PRGn", interpolation=interpolation, extent=(showFromX, showToX, showFromY, showToY))
-
-        # I have no bloody clue why the impurity and pinning arrays need to be flipped in y to match with the magnetization array but they do
-        if plotImpurity:
-            impurityArray = np.flip(getImpurityArray(directory, np.array([1, 0, 0, 0.2]), zIndex)[
-                                    startXIdx:endXIdx, startYIdx:endYIdx].transpose(1, 0, 2), axis=0)
-            ax.imshow(impurityArray, extent=(
-                showFromX, showToX, showFromY, showToY))
-
-        if plotPinning:
-            pinningArray = np.flip(getPinningArray(directory)[
-                                   startXIdx:endXIdx, startYIdx:endYIdx].transpose(1, 0, 2), axis=0)
-            ax.imshow(pinningArray, extent=(
-                showFromX, showToX, showFromY, showToY))
-
-    else:
-
-        thePlot = ax.imshow(rhoSkArray.transpose(), animated=True, vmin=-1*colourMapMax, vmax=colourMapMax,
-                            origin="lower", cmap="PRGn", interpolation=interpolation, extent=(0, Lx, 0, Ly))
-        if plotImpurity:
-            impurityArray = np.flip(getImpurityArray(directory, np.array(
-                [1, 0, 0, 0.2]), zIndex).transpose(1, 0, 2), axis=0)
-            ax.imshow(impurityArray, extent=(0, Lx, 0, Ly))
-
-        if plotPinning:
-            pinningArray = np.flip(getPinningArray(
-                directory).transpose(1, 0, 2), axis=0)
-            ax.imshow(pinningArray, extent=(0, Lx, 0, Ly))
-
-    ax.set_xlabel(r"$x$ (nm)")
-    ax.set_ylabel(r"$y$ (nm)")
-
-    return thePlot
+        self.ax.set_xlabel(r"$x$ (nm)")
+        self.ax.set_ylabel(r"$y$ (nm)")
 
 
 def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMFileName='COM.npy', ax=None, presentationMethod='legend', showStopRamp=False, timeMultiplier=None, speedMultiplier=None, currentMultiplier=None, colorbarLabel=None):

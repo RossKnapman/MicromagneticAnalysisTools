@@ -156,17 +156,3 @@ def initialFileArray(directory):
 
     return mInit
 
-
-def loadFile(inFile, component, zIndex):
-
-    if component == 'x':
-        return df.Field.fromfile(inFile).array[:, :, zIndex, 0]
-
-    elif component == 'y':
-        return df.Field.fromfile(inFile).array[:, :, zIndex, 1]
-
-    elif component == 'z':
-        return df.Field.fromfile(inFile).array[:, :, zIndex, 2]
-
-    else:
-        raise Exception('Component must be of the form x, y, z.')

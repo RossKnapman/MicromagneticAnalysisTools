@@ -208,33 +208,3 @@ def NskArray(directory, zIndex=0, startFile=None, endFile=None, calculateFromX=N
         Nsk[i] = skyrmionNumber(m)
 
     return Nsk
-
-
-def skyrmionCOMOld(directory, inFile, edgeCutXFrac, edgeCutYFrac, dx, dy, zIndex):
-    """ Returns the centre of mass of the skyrmion, found using the centre of mass of the skyrmion number density.
-    edgeCut is how many cells should be cut off from the edge of the simulation, as Neumann boundary conditions can result in
-    significant non-zero skyrmion number densities at the edges, e.g. for helical states.
-
-    edgeCut is the fraction of the system's width and height that should be excluded from the COM calculation (as, with Neumann BCs, edge effect result in non-negligible skyrmion densities at the edges).
-    """
-
-    Lx, Ly = Read.sampleExtent(directory)
-
-    edgeCutX = int(np.round(edgeCutXFrac * Lx))
-    edgeCutY = int(np.round(edgeCutYFrac * Ly))
-
-    m = df.Field.fromfile(directory + '/' + inFile).array[:, :, zIndex]
-    m = m[edgeCutX:m.shape[0]-edgeCutX, edgeCutY:m.shape[1]-edgeCutY]
-
-    mReduced = m[:-1, :-1]
-
-    mdx = np.diff(m, axis=0)[:, :-1]
-    mdy = np.diff(m, axis=1)[:-1, :]
-    rhoSk = np.einsum('ijk,ijk->ij', mReduced, np.cross(mdx, mdy))
-    print(rhoSk.shape)
-    Nsk = np.sum(rhoSk)  # Out from the "usual" Nsk by 4pi
-
-    xy = np.indices((m.shape[0]-1, m.shape[1]-1)).transpose(1, 2, 0)
-    comArray = np.einsum('ijk,ij->ijk', xy, rhoSk)
-
-    return np.array([(np.sum(comArray[:, :, 0] / Nsk) + edgeCutX) * dx * 1e9, (np.sum(comArray[:, :, 1] / Nsk) + edgeCutY) * dy * 1e9])

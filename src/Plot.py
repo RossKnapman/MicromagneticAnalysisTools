@@ -105,7 +105,8 @@ def vecToRGB(m):
 
     return rgbArray
 
-class ColourPlotter:
+
+class MagnetizationPlotter:
 
     def __init__(self,
     plot_type,
@@ -120,8 +121,8 @@ class ColourPlotter:
     interpolation=None,
     limits=None,
     length_units=None,
-    step=1,
-    quiver_colour='black'):
+    max_skyrmion_density=None,
+    step=1):
         self.plot_type = plot_type
         self.directory = directory
         self.plot_file = plot_file
@@ -134,6 +135,7 @@ class ColourPlotter:
         self.interpolation = interpolation
         self.limits = limits
         self.length_units = length_units
+        self.max_skyrmion_density = max_skyrmion_density
         self.step = step 
 
         self.Lx, self.Ly = Read.sampleExtent(self.directory)
@@ -143,8 +145,7 @@ class ColourPlotter:
         self.m_array = self.m_array[self.limits_indices[0]: self.limits_indices[1],
             self.limits_indices[2]: self.limits_indices[3]]
 
-        if self.ax == None:
-            self.ax = plt.subplots()[1]
+        if self.ax == None: self.ax = plt.subplots()[1]
 
     def _get_limits_indices(self):
 
@@ -166,7 +167,7 @@ class ColourPlotter:
         
         magnetization_array = self.m_array[:, :, self.z_index, :]
         plot_array = vecToRGB(magnetization_array).transpose(1, 0, 2)
-        self.ax.imshow(plot_array, animated=True, origin='lower',
+        self.out_plot = self.ax.imshow(plot_array, animated=True, origin='lower',
             interpolation=self.interpolation, extent=self.limits_indices)
 
     def _plot_magnetization_single_component(self):
@@ -180,7 +181,7 @@ class ColourPlotter:
         elif self.component == 'z':
             plot_array = self.m_array[:, :, self.z_index, 2]
 
-        self.ax.imshow(plot_array.transpose(), animated=True, vmin=-1, vmax=1, origin='lower',
+        self.out_plot = self.ax.imshow(plot_array.transpose(), animated=True, vmin=-1, vmax=1, origin='lower',
             cmap='RdBu_r', interpolation=self.interpolation, extent=self.limits_indices)
 
         if self.show_component:
@@ -194,9 +195,14 @@ class ColourPlotter:
         dx, dy = Read.sampleDiscretisation(self.directory)[:2]
 
         skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).transpose()
-        colour_map_max = np.max(np.abs(skyrmion_density_array))
 
-        self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
+        if self.max_skyrmion_density:
+            colour_map_max = self.max_skyrmion_density
+
+        else:
+            colour_map_max = np.max(np.abs(skyrmion_density_array))
+
+        self.out_plot = self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
             origin='lower', cmap='PRGn', interpolation=self.interpolation, extent=self.limits_indices)
 
     def _plot_quiver(self):
@@ -217,7 +223,7 @@ class ColourPlotter:
         alphaArray = alphaArray.transpose(1, 0, 2)
         alphaArray = np.interp(alphaArray, (0.4, np.max(alphaArray)), (0, 1))
 
-        thePlot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose(),
+        self.out_plot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose(),
             magnetization_array[:, :, 1].transpose(), color=np.reshape(alphaArray, (magnetization_array.shape[0] * magnetization_array.shape[1], 4)),
             units='xy', scale_units='xy', pivot='mid', headwidth=6, headlength=10, headaxislength=10, linewidth=10)
 
@@ -254,6 +260,8 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
 
         self.ax.set_xlabel(r'$x$ (nm)')
         self.ax.set_ylabel(r'$y$ (nm)')
+
+        return self.out_plot
 
 
 def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMFileName='COM.npy', ax=None, presentationMethod='legend', showStopRamp=False, timeMultiplier=None, speedMultiplier=None, currentMultiplier=None, colorbarLabel=None):

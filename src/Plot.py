@@ -7,11 +7,6 @@ from src import Read
 from src import Calculate
 
 
-def lengthToIdx(length, systemSize, array):
-    """ Convert a length (in e.g. metres) to array index, given the system's size systemSize (e.g. Lx, the x-length of the system in nanometres). """
-    return int(np.round(length))
-
-
 def getImpurityArray(directory, impurityColour, zIndex):
     """ Returns an array used to plot the impurity on a colour plot. The colour is of the form of a numpy array [R, G, B, alpha]. """
 

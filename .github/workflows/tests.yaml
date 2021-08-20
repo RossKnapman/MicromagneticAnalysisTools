@@ -18,7 +18,8 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        sudo apt install ffmpeg --fix-missing
+        apt-get -y update
+        apt-get install -y ffmpeg
         python3 -m pip install --upgrade pip
         pip3 install -r requirements.txt
 

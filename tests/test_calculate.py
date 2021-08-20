@@ -42,3 +42,12 @@ def test_skyrmion_number_nontrivial(m):
     mArray[:, :, 2] = mz
 
     assert np.abs(Calculate.skyrmionNumber(mArray) - m) < 0.05
+
+def test_hopf_index():
+
+    """ Load in sample hopfion texture and ensure the Hopf index is approximately 1. """
+
+    with np.load("tests/data/Hopfion.npz") as compressed:
+        m = compressed['m']
+
+    assert np.abs(1. - Calculate.HopfIdx(m)) < 0.05

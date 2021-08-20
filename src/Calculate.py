@@ -208,3 +208,62 @@ def NskArray(directory, zIndex=0, startFile=None, endFile=None, calculateFromX=N
         Nsk[i] = skyrmionNumber(m)
 
     return Nsk
+
+
+def HopfIdx(m, acc=8):
+
+    """ Calculate the Hopf index of a magnetization vector field of shape (x_length, y_length, z_length, 3). """
+    
+    d_dx = findiff.FinDiff(0, 1, 1, acc=acc)  # args: axis, lattice constant, derivative order, accuracy
+    d_dy = findiff.FinDiff(1, 1, 1, acc=acc)
+    d_dz = findiff.FinDiff(2, 1, 1, acc=acc)
+
+    mdx = d_dx(m)
+    mdy = d_dy(m)
+    mdz = d_dz(m)
+
+    Fx = 2 * np.einsum('ijkl,ijkl->ijk', m, np.cross(mdy, mdz))
+    Fy = 2 * np.einsum('ijkl,ijkl->ijk', m, np.cross(mdz, mdx))
+    Fz = 2 * np.einsum('ijkl,ijkl->ijk', m, np.cross(mdx, mdy))
+
+    F = np.zeros((Fx.shape[0], Fx.shape[1], Fx.shape[2], 3))
+    F[:, :, :, 0] = Fx
+    F[:, :, :, 1] = Fy
+    F[:, :, :, 2] = Fz
+
+    A = np.zeros((Fz.shape[0], Fz.shape[1], Fz.shape[2], 3))
+    A[:, :, :, 0] = -np.cumsum(Fz, axis=1)  # Cumulative sum along y-axis
+    A[:, :, :, 2] = np.cumsum(Fx, axis=1)
+
+    dotProduct = np.einsum('ijkl,ijkl->ijk', F, A)
+    hopfIdx = -np.sum(dotProduct) / (8 * np.pi)**2
+    return(hopfIdx)
+
+
+def Hopf_density(m, acc=8):
+    
+    """ Calculate the Hopf index density of a magnetization vector field of shape (x_length, y_length, z_length, 3). """
+
+    d_dx = findiff.FinDiff(0, 1, 1, acc=acc)  # args: axis, lattice constant, derivative order, accuracy
+    d_dy = findiff.FinDiff(1, 1, 1, acc=acc)
+    d_dz = findiff.FinDiff(2, 1, 1, acc=acc)
+
+    mdx = d_dx(m)
+    mdy = d_dy(m)
+    mdz = d_dz(m)
+
+    Fx = 2 * np.einsum('ijkl,ijkl->ijk', m, np.cross(mdy, mdz))
+    Fy = 2 * np.einsum('ijkl,ijkl->ijk', m, np.cross(mdz, mdx))
+    Fz = 2 * np.einsum('ijkl,ijkl->ijk', m, np.cross(mdx, mdy))
+
+    F = np.zeros((Fx.shape[0], Fx.shape[1], Fx.shape[2], 3))
+    F[:, :, :, 0] = Fx
+    F[:, :, :, 1] = Fy
+    F[:, :, :, 2] = Fz
+
+    A = np.zeros((Fz.shape[0], Fz.shape[1], Fz.shape[2], 3))
+    A[:, :, :, 0] = -np.cumsum(Fz, axis=1)  # Cumulative sum along y-axis
+    A[:, :, :, 2] = np.cumsum(Fx, axis=1)
+
+    dotProduct = np.einsum('ijkl,ijkl->ijk', F, A)
+    return dotProduct

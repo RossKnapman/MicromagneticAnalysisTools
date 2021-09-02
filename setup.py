@@ -9,6 +9,6 @@ setup(
     description="A collection of tools to analyse data from MuMax3.",
     author="Ross Knapman",
     author_email="rjknapman@gmail.com",
-    packages=find_packages(include=['src', 'src/*']),
+    packages=find_packages(include=['MicromagneticAnalysisTools', 'MicromagneticAnalysisTools/*']),
     install_requires=install_requires,
 )

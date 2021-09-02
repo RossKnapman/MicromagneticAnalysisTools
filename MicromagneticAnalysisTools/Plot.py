@@ -135,6 +135,8 @@ class MagnetizationPlotter:
 
         self.Lx, self.Ly = Read.sampleExtent(self.directory)
         self.m_array = df.Field.fromfile(self.directory + '/' + self.plot_file).array
+
+        if self.limits == None: self.limits = [0., self.Lx, 0., self.Ly]
         self.limits_indices = self._get_limits_indices()
         
         self.m_array = self.m_array[self.limits_indices[0]: self.limits_indices[1],
@@ -144,26 +146,19 @@ class MagnetizationPlotter:
 
     def _get_limits_indices(self):
 
-        try:
-            start_x_idx = int(np.round((self.limits[0]/ self.Lx) * self.m_array.shape[0]))
-            end_x_idx = int(np.round((self.limits[1] / self.Lx) * self.m_array.shape[0]))
-            start_y_idx = int(np.round((self.limits[2]/ self.Ly) * self.m_array.shape[1]))
-            end_y_idx  = int(np.round((self.limits[3] / self.Ly) * self.m_array.shape[1]))
+        start_x_idx = int(np.round((self.limits[0] / self.Lx) * self.m_array.shape[0]))
+        end_x_idx = int(np.round((self.limits[1] / self.Lx) * self.m_array.shape[0]))
+        start_y_idx = int(np.round((self.limits[2] / self.Ly) * self.m_array.shape[1]))
+        end_y_idx  = int(np.round((self.limits[3] / self.Ly) * self.m_array.shape[1]))
         
-        except TypeError:
-            start_x_idx = 0
-            end_x_idx = self.m_array.shape[0]
-            start_y_idx = 0
-            end_y_idx = self.m_array.shape[1]
-
         return [start_x_idx, end_x_idx, start_y_idx, end_y_idx]
 
     def _plot_magnetization(self):
-        
+
         magnetization_array = self.m_array[:, :, self.z_index, :]
         plot_array = vecToRGB(magnetization_array).transpose(1, 0, 2)
         self.out_plot = self.ax.imshow(plot_array, animated=True, origin='lower',
-            interpolation=self.interpolation, extent=self.limits_indices)
+            interpolation=self.interpolation, extent=self.limits)
 
     def _plot_magnetization_single_component(self):
 
@@ -177,7 +172,7 @@ class MagnetizationPlotter:
             plot_array = self.m_array[:, :, self.z_index, 2]
 
         self.out_plot = self.ax.imshow(plot_array.transpose(), animated=True, vmin=-1, vmax=1, origin='lower',
-            cmap='RdBu_r', interpolation=self.interpolation, extent=self.limits_indices)
+            cmap='RdBu_r', interpolation=self.interpolation, extent=self.limits)
 
         if self.show_component:
             self.ax.text(self.Lx + 5, 0, "$m_" + self.component + "$")
@@ -198,7 +193,7 @@ class MagnetizationPlotter:
             colour_map_max = np.max(np.abs(skyrmion_density_array))
 
         self.out_plot = self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
-            origin='lower', cmap='PRGn', interpolation=self.interpolation, extent=self.limits_indices)
+            origin='lower', cmap='PRGn', interpolation=self.interpolation, extent=self.limits)
 
     def _plot_quiver(self):
 
@@ -225,12 +220,12 @@ class MagnetizationPlotter:
     def _plot_impurity(self):
         impurity_array = np.flip(getImpurityArray(self.directory, np.array([0, 1, 0, 0.2]), self.z_index)[
 self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.limits_indices[3]].transpose(1, 0, 2), axis=0)
-        self.ax.imshow(impurity_array, extent=self.limits_indices)
+        self.ax.imshow(impurity_array, extent=self.limits)
 
     def _plot_pinning(self):
         pinning_array = np.flip(getPinningArray(self.directory)[
 self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.limits_indices[3]].transpose(1, 0, 2), axis=0)
-        self.ax.imshow(pinning_array, extent=self.limits_indices)
+        self.ax.imshow(pinning_array, extent=self.limits)
 
     def plot(self):
 
@@ -263,7 +258,6 @@ def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMF
     """ For a given directory, plot the speeds of the skyrmions in the respective sub-directories. """
 
     if ax is None:
-        print('Failed')
         ax = plt.subplots()[1]
 
     if currentMultiplier:

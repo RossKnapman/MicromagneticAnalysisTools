@@ -1,7 +1,7 @@
-from src.Plot import MagnetizationPlotter
-from src import Animate
-from src import Calculate
-from src import Read
+from MicromagneticAnalysisTools.Plot import MagnetizationPlotter
+from MicromagneticAnalysisTools import Animate
+from MicromagneticAnalysisTools import Calculate
+from MicromagneticAnalysisTools import Read
 import numpy as np
 import os
 import pytest

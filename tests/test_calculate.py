@@ -1,5 +1,5 @@
 import pytest
-from src import Calculate
+from MicromagneticAnalysisTools import Calculate
 import numpy as np
 
 

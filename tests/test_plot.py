@@ -1,5 +1,5 @@
-from src import Plot
-from src import Calculate
+from MicromagneticAnalysisTools import Plot
+from MicromagneticAnalysisTools import Calculate
 import numpy as np
 import pytest
 

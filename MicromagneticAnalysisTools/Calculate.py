@@ -2,7 +2,7 @@ import numpy as np
 import discretisedfield as df
 import findiff
 
-from src import Read
+from MicromagneticAnalysisTools import Read
 
 
 def skyrmionNumber(m):

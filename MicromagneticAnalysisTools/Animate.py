@@ -5,9 +5,9 @@ from matplotlib import animation
 from matplotlib.patches import Circle
 import discretisedfield as df
 import re
-from src import Read
-from src import Plot
-from src import Calculate
+from MicromagneticAnalysisTools import Read
+from MicromagneticAnalysisTools import Plot
+from MicromagneticAnalysisTools import Calculate
 
 
 def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", outName="Movie.mp4", initialMinValue=0, initialMaxValue=0):

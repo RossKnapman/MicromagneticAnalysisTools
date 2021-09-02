@@ -3,8 +3,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import discretisedfield as df
-from src import Read
-from src import Calculate
+from MicromagneticAnalysisTools import Read
+from MicromagneticAnalysisTools import Calculate
 
 
 def getImpurityArray(directory, impurityColour, zIndex):

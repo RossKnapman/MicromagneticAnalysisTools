@@ -25,5 +25,8 @@ jobs:
 
     - name: Test with pytest
       run: |
+        pip3 install pytest
+        pip3 install pytest-cov
+        pip3 install pytest-github-actions-annotate-failures
         pytest --exitfirst --verbose --failed-first \
         --cov=. --cov-report html

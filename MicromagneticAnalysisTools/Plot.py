@@ -36,6 +36,8 @@ def getPinningArray(directory):
 def vecToRGB(m):
     """ Vectorised version of colorsys.hls_to_rgb """
 
+    m[np.where(m == -0.)] = 0.  # Change -0. to 0.
+
     ONE_THIRD = 1.0/3.0
     ONE_SIXTH = 1.0/6.0
     TWO_THIRD = 2.0/3

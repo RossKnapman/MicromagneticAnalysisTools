@@ -5,7 +5,7 @@ Code I use for analysing data from MuMax3.
 
 ## TODO
 
-- [-] Fix plot colour bug for HSV colours
+- [x] Fix plot colour bug for HSV colours
 - [-] Fix animation bug where it doesn't move
 - [-] Fix bug where first frame is appended to animation
 - [ ] Delete redundant functions e.g. COM calculation that does not go to a comoving frame

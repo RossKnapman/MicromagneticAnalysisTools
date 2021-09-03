@@ -5,9 +5,8 @@ Code I use for analysing data from MuMax3.
 
 ## TODO
 
-- [x] Write unit tests
-- [x] Refactor code so that code with the same functionality is not duplicated
-- [x] Write `setup.py`
+- [x] Fix plot colour bug for HSV colours
+- [x] Fix animation bug where it doesn't move
 - [ ] Delete redundant functions e.g. COM calculation that does not go to a comoving frame
 - [ ] Some functions (e.g. `vecToRGB`) should be moved to a separate `utils.py` directory
 - [ ] 'Proper' docstrings

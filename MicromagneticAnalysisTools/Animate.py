@@ -172,14 +172,12 @@ class MagnetizationAnimator:
             self.file_text = self.ax.text(0.5*self.Lx, 1.1*self.Ly, "")
             self.time_text = self.ax.text(0, 1.1*self.Ly, "")
 
-        plotter.plot()
-
     def _get_limits_indices(self):
 
         try:
-            start_x_idx = int(np.round((self.limits[0]/ self.Lx) * self.m_array.shape[0]))
+            start_x_idx = int(np.round((self.limits[0] / self.Lx) * self.m_array.shape[0]))
             end_x_idx = int(np.round((self.limits[1] / self.Lx) * self.m_array.shape[0]))
-            start_y_idx = int(np.round((self.limits[2]/ self.Ly) * self.m_array.shape[1]))
+            start_y_idx = int(np.round((self.limits[2] / self.Ly) * self.m_array.shape[1]))
             end_y_idx  = int(np.round((self.limits[3] / self.Ly) * self.m_array.shape[1]))
         
         except TypeError:
@@ -193,9 +191,9 @@ class MagnetizationAnimator:
     def _get_limits_indices(self):
 
         try:
-            start_x_idx = int(np.round((self.limits[0]/ self.Lx) * self.m_array.shape[0]))
+            start_x_idx = int(np.round((self.limits[0] / self.Lx) * self.m_array.shape[0]))
             end_x_idx = int(np.round((self.limits[1] / self.Lx) * self.m_array.shape[0]))
-            start_y_idx = int(np.round((self.limits[2]/ self.Ly) * self.m_array.shape[1]))
+            start_y_idx = int(np.round((self.limits[2] / self.Ly) * self.m_array.shape[1]))
             end_y_idx  = int(np.round((self.limits[3] / self.Ly) * self.m_array.shape[1]))
         
         except TypeError:

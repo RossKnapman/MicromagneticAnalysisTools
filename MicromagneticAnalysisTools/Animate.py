@@ -146,14 +146,14 @@ class MagnetizationAnimator:
 
         plotter = Plot.MagnetizationPlotter(self.plot_type, self.directory, self.files_to_scan[0],
         ax=self.ax, z_index=self.z_index, component=self.component, plot_impurity=self.plot_impurity,
-        plot_pinning=self.plot_pinning, show_component=self.show_component, interpolation=self.interpolation,
+        plot_pinning = self.plot_pinning, show_component=self.show_component, interpolation=self.interpolation,
         limits=self.limits, length_units=self.length_units, step=self.step)
 
         self.colour_plot = plotter.plot()
 
         if self.quiver:
             quiver_plotter = Plot.MagnetizationPlotter('quiver', self.directory, self.files_to_scan[0],
-            ax=self.ax, step=self.step, limits=self.limits)
+            fig=self.fig, ax=self.ax, step=self.step, limits=self.limits)
             self.quiver_plot = quiver_plotter.plot()
 
         if self.com_array_file:
@@ -172,8 +172,6 @@ class MagnetizationAnimator:
             self.file_text = self.ax.text(0.5*self.Lx, 1.1*self.Ly, "")
             self.time_text = self.ax.text(0, 1.1*self.Ly, "")
 
-        plotter.plot()
-
     def _get_limits_indices(self):
 
         try:
@@ -193,9 +191,9 @@ class MagnetizationAnimator:
     def _get_limits_indices(self):
 
         try:
-            start_x_idx = int(np.round((self.limits[0]/ self.Lx) * self.m_array.shape[0]))
+            start_x_idx = int(np.round((self.limits[0] / self.Lx) * self.m_array.shape[0]))
             end_x_idx = int(np.round((self.limits[1] / self.Lx) * self.m_array.shape[0]))
-            start_y_idx = int(np.round((self.limits[2]/ self.Ly) * self.m_array.shape[1]))
+            start_y_idx = int(np.round((self.limits[2] / self.Ly) * self.m_array.shape[1]))
             end_y_idx  = int(np.round((self.limits[3] / self.Ly) * self.m_array.shape[1]))
         
         except TypeError:
@@ -213,7 +211,7 @@ class MagnetizationAnimator:
 
         magnetization_array = magnetization_array[self.limits_indices[0]: self.limits_indices[1],
             self.limits_indices[2]: self.limits_indices[3]]
-            
+
         plot_array = Plot.vecToRGB(magnetization_array).transpose(1, 0, 2)
         self.colour_plot.set_array(plot_array)
 
@@ -307,7 +305,6 @@ class MagnetizationAnimator:
         anim = animation.FuncAnimation(
                 self.fig, update_anim, iter(range(len(self.files_to_scan))), interval=25, blit=False, save_count=len(self.files_to_scan))         
 
-
         if self.plot_type == 'magnetization':
             if self.start_file or self.limits:
                 # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
@@ -333,4 +330,3 @@ class MagnetizationAnimator:
                 outName = 'SkDensity.mp4'
 
         anim.save(outName, fps=25, writer='ffmpeg')
-

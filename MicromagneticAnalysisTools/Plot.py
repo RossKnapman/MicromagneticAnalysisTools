@@ -199,8 +199,9 @@ class MagnetizationPlotter:
 
     def _plot_quiver(self):
 
-        x = np.linspace(0, self.Lx, self.m_array.shape[0])
-        y = np.linspace(0, self.Ly, self.m_array.shape[1])
+        # Note that the arrays are "flipped" here due to how the axes in quiver() are defined
+        x = np.linspace(self.limits[2], self.limits[3], self.m_array.shape[1])
+        y = np.linspace(self.limits[0], self.limits[1], self.m_array.shape[0])
         X, Y = np.meshgrid(x, y)
 
         X = X[::self.step, ::self.step]

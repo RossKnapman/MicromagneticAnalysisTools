@@ -8,6 +8,7 @@ import re
 from MicromagneticAnalysisTools import Read
 from MicromagneticAnalysisTools import Plot
 from MicromagneticAnalysisTools import Calculate
+plt.rcdefaults()  # Reset stylesheet imported by discretisedfield
 
 
 def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", outName="Movie.mp4", initialMinValue=0, initialMaxValue=0):

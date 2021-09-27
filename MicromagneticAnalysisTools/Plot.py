@@ -5,6 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import discretisedfield as df
 from MicromagneticAnalysisTools import Read
 from MicromagneticAnalysisTools import Calculate
+plt.rcdefaults()  # Reset stylesheet imported by discretisedfield
 
 
 def getImpurityArray(directory, impurityColour, zIndex):

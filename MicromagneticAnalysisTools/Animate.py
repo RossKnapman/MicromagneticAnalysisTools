@@ -95,6 +95,7 @@ class MagnetizationAnimator:
     z_index = 0,
     com_array_file = None,
     component=None,
+    show_time=False,
     plot_impurity=None,
     plot_pinning=None,
     show_component=False,
@@ -113,6 +114,7 @@ class MagnetizationAnimator:
         self.z_index = z_index
         self.com_array_file = com_array_file
         self.component = component
+        self.show_time = show_time
         self.quiver = quiver
         self.plot_impurity = plot_impurity
         self.plot_pinning = plot_pinning
@@ -162,15 +164,17 @@ class MagnetizationAnimator:
                 (self.com_array[0, 0], self.com_array[0, 1]), 10, color=self.marker_colour, alpha=0.8)
             self.ax.add_patch(self.com_marker) 
 
-        if self.limits:
-            self.file_text = self.ax.text(0.5 * (self.limits[1] - self.limits[0]) + self.limits[0],
-                           1.1 * (self.limits[3] - self.limits[2]) + self.limits[2], "")
-            self.time_text = self.ax.text(
-                self.limits[0], 1.1 * (self.limits[3] - self.limits[2]) + self.limits[2], "")
+        if self.show_time:
 
-        else:
-            self.file_text = self.ax.text(0.5*self.Lx, 1.1*self.Ly, "")
-            self.time_text = self.ax.text(0, 1.1*self.Ly, "")
+            if self.limits:
+                self.file_text = self.ax.text(0.5 * (self.limits[1] - self.limits[0]) + self.limits[0],
+                            1.1 * (self.limits[3] - self.limits[2]) + self.limits[2], "")
+                self.time_text = self.ax.text(
+                    self.limits[0], 1.1 * (self.limits[3] - self.limits[2]) + self.limits[2], "")
+
+            else:
+                self.file_text = self.ax.text(0.5*self.Lx, 1.1*self.Ly, "")
+                self.time_text = self.ax.text(0, 1.1*self.Ly, "")
 
     def _get_limits_indices(self):
 
@@ -283,8 +287,9 @@ class MagnetizationAnimator:
 
             full_file = self.directory + '/' + self.files_to_scan[i]
 
-            self.file_text.set_text('File: ' + self.files_to_scan[i])
-            self.time_text.set_text('$t$ = ' + "{:.2f}".format(Read.fileTime(full_file) * 1e9) + " ns")
+            if self.show_time:
+                self.file_text.set_text('File: ' + self.files_to_scan[i])
+                self.time_text.set_text('$t$ = ' + "{:.2f}".format(Read.fileTime(full_file) * 1e9) + " ns")
 
             if self.plot_type == 'magnetization':
                 self._update_magnetization_array(full_file)

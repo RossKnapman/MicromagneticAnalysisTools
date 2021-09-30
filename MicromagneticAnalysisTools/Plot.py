@@ -57,7 +57,7 @@ def vecToRGB(m):
         whereHueLessHalf = np.where((hue < 0.5) & (hue >= ONE_SIXTH))
         outValue[whereHueLessHalf] = m2[whereHueLessHalf]
 
-        whereHueLessTwoThird = np.where((hue < TWO_THIRD) & (hue > 0.5))
+        whereHueLessTwoThird = np.where((hue < TWO_THIRD) & (hue >= 0.5))
         outValue[whereHueLessTwoThird] = m1[whereHueLessTwoThird] + \
             (m2[whereHueLessTwoThird] - m1[whereHueLessTwoThird]) * \
             (TWO_THIRD - hue[whereHueLessTwoThird]) * 6.0

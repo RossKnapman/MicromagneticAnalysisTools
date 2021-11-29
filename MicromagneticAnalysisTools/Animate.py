@@ -107,7 +107,8 @@ class MagnetizationAnimator:
     step=1,
     start_file = None,
     end_file = None,
-    rectangle_fracs = None):
+    rectangle_fracs = None,
+    out_name = None):
         self.plot_type = plot_type
         self.directory = directory
         self.fig = fig
@@ -127,6 +128,7 @@ class MagnetizationAnimator:
         self.start_file = start_file
         self.end_file = end_file
         self.rectangle_fracs = rectangle_fracs
+        self.out_name = out_name
 
         self.files_to_scan = Read.getFilesToScan(self.directory, self.start_file, self.end_file)
         assert len(self.files_to_scan) != 0
@@ -311,30 +313,31 @@ class MagnetizationAnimator:
         anim = animation.FuncAnimation(
                 self.fig, update_anim, iter(range(len(self.files_to_scan))), interval=25, blit=False, save_count=len(self.files_to_scan))         
 
+        if self.out_name is None:
 
-        if self.plot_type == 'magnetization':
-            if self.start_file or self.limits:
-                # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
-                outName = 'mag_part.mp4'
+            if self.plot_type == 'magnetization':
+                if self.start_file or self.limits:
+                    # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
+                    self.out_name = 'mag_part.mp4'
 
-            else:
-                outName = 'mag.mp4'
+                else:
+                    self.out_name = 'mag.mp4'
 
-        elif self.plot_type == 'magnetization_single_component':
-            if self.start_file or self.limits:
-                # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
-                outName = 'm' + self.component + '_part' + '.mp4'
+            elif self.plot_type == 'magnetization_single_component':
+                if self.start_file or self.limits:
+                    # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
+                    self.out_name = 'm' + self.component + '_part' + '.mp4'
 
-            else:
-                outName = 'm' + self.component + '.mp4'
+                else:
+                    self.out_name = 'm' + self.component + '.mp4'
 
-        elif self.plot_type == 'skyrmion_density':
-            if self.start_file or self.limits:
-                # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
-                outName = 'SkDensityPart.mp4'
+            elif self.plot_type == 'skyrmion_density':
+                if self.start_file or self.limits:
+                    # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
+                    self.out_name = 'SkDensityPart.mp4'
 
-            else:
-                outName = 'SkDensity.mp4'
+                else:
+                    self.out_name = 'SkDensity.mp4'
 
-        anim.save(outName, fps=25, writer='ffmpeg')
+        anim.save(self.out_name, fps=25, writer='ffmpeg')
 

@@ -11,7 +11,7 @@ from MicromagneticAnalysisTools import Calculate
 plt.rcdefaults()  # Reset stylesheet imported by discretisedfield
 
 
-def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", outName="Movie.mp4", initialMinValue=0, initialMaxValue=0):
+def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", out_name="Movie.mp4", initialMinValue=0, initialMaxValue=0):
     """ Outputs an animation of a generic quantity (e.g. Nsk, energy, current) over time. The input arrays are to be given as file names, e.g. Nsk.npy, Time.npy. """
 
     t = timeArray * 1e9
@@ -28,7 +28,7 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
     maxValue = initialMaxValue
 
     quantityText = ax.text(0, maxValue, "")
-    timeText = ax.text(0.1 * np.max(timeArray), maxValue, "")
+    timeText = ax.text(0.05 * t[0], maxValue, "")
 
     def init():
         pass
@@ -48,9 +48,21 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
 
             quantityText.set_text(
                 quantityTextValue + " = " + quantityTextFormat.format(quantityArray[i]))
-            quantityText.set_position((0.05 * t[i], 0.3 * maxValue))
+
+            if maxValue == 0:  # Stop the texts being placed on top of one another if the energy is zero
+                quantity_text_y = 0.02
+                time_text_y = 0.03
+            
+            else:
+                quantity_text_y = 0.3 * maxValue
+                time_text_y = 0.5 * maxValue
+
+            text_x = 0.05 * t[i]
+
+            quantityText.set_position((text_x, quantity_text_y))
+            timeText.set_position((text_x, time_text_y))
+
             timeText.set_text('t = ' + '{:.2f}'.format(t[i]) + ' ns')
-            timeText.set_position((0.05 * t[i], 0.5 * maxValue))
 
         except ValueError:
             pass
@@ -63,28 +75,28 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
 
     dataIterator = iter(range(len(quantityArray)))
 
-    print("Producing animation", outName)
+    print("Producing animation", out_name)
 
     anim = animation.FuncAnimation(fig, updateAnim, dataIterator, init_func=init,
                                    interval=25, blit=False, save_count=len(quantityArray))
     plt.tight_layout()
 
-    anim.save(outName, fps=25, writer='ffmpeg')
+    anim.save(out_name, fps=25, writer='ffmpeg')
 
 
 def NskAnimation(NskArray, timeArray):
     oneDQuantity(NskArray, timeArray, r"$N_{\mathrm{sk}}$", r"$N_{\mathrm{sk}}$",
-                 outName="Nsk.mp4", initialMinValue=-1.1, initialMaxValue=1.1)
+                 out_name="Nsk.mp4", initialMinValue=-1.1, initialMaxValue=1.1)
 
 
 def currentAnimation(currentArray, timeArray, component):
     oneDQuantity(currentArray, timeArray, "$j_" + component + "$ (A m$^{-2}$)", "$j_" + component + "$",
-                 quantityTextFormat="{:.2e}", outName="Current" + component + ".mp4", initialMinValue=0, initialMaxValue=1)
+                 quantityTextFormat="{:.2e}", out_name="Current" + component + ".mp4", initialMinValue=0, initialMaxValue=1)
 
 
 def energyAnimation(energyArray, timeArray):
-    oneDQuantity(energyArray, timeArray, "$E$ (J)", "$E$",
-                 quantityTextFormat="{:.2e}", outName="Energy.mp4", initialMinValue=energyArray[0], initialMaxValue=0.9 * energyArray[0])
+    oneDQuantity(energyArray, timeArray, "$E$ (J)", "$E$ (J)",
+                 quantityTextFormat="{:.2e}", out_name="Energy.mp4", initialMinValue=energyArray[0], initialMaxValue=0.9 * energyArray[0])
 
 class MagnetizationAnimator:
 

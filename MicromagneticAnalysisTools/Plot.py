@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -120,7 +121,8 @@ class MagnetizationPlotter:
     limits=None,
     length_units=None,
     max_skyrmion_density=None,
-    step=1):
+    step=1,
+    quiver_colour=[1, 1, 1]):
         self.plot_type = plot_type
         self.directory = directory
         self.plot_file = plot_file
@@ -135,6 +137,7 @@ class MagnetizationPlotter:
         self.length_units = length_units
         self.max_skyrmion_density = max_skyrmion_density
         self.step = step 
+        self.quiver_colour = quiver_colour
 
         self.Lx, self.Ly = Read.sampleExtent(self.directory)
         self.m_array = df.Field.fromfile(self.directory + '/' + self.plot_file).array
@@ -144,6 +147,9 @@ class MagnetizationPlotter:
         
         self.m_array = self.m_array[self.limits_indices[0]: self.limits_indices[1],
             self.limits_indices[2]: self.limits_indices[3]]
+
+        if self.plot_type == 'magnetization_single_component' and self.component == None:
+            raise ValueError('Must specify component x, y, or z.')
 
         if self.ax == None: self.ax = plt.subplots()[1]
 
@@ -210,8 +216,9 @@ class MagnetizationPlotter:
 
         magnetization_array = self.m_array[::self.step, ::self.step, self.z_index, :]
 
-        # Control transparency of arrows
-        alphaArray = np.ones((magnetization_array.shape[0], magnetization_array.shape[1], 4))
+        # Control transparency of arrows (more opaque the more the magnetization is in-plane)
+        alphaArray = np.ones((magnetization_array.shape[0], magnetization_array.shape[1], 4))  # Array of [r, g, b, alpha]
+        alphaArray[:, :, :3] = self.quiver_colour
         alphaArray[:, :, 3] = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2)
         alphaArray = alphaArray / np.max(alphaArray)
         alphaArray = alphaArray.transpose(1, 0, 2)
@@ -254,6 +261,9 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
 
         self.ax.set_xlabel(r'$x$ (nm)')
         self.ax.set_ylabel(r'$y$ (nm)')
+        self.ax.set_aspect('equal')
+        self.ax.set_xlim(self.limits[0], self.limits[1])
+        self.ax.set_ylim(self.limits[2], self.limits[3])
 
         return self.out_plot
 

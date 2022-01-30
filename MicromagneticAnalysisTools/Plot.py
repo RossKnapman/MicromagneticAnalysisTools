@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,7 +5,11 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import discretisedfield as df
 from MicromagneticAnalysisTools import Read
 from MicromagneticAnalysisTools import Calculate
+import logging
 plt.rcdefaults()  # Reset stylesheet imported by discretisedfield
+
+# Stop annoying warnings from matplotlib (may need to remove this for debugging)
+logging.getLogger('matplotlib').setLevel(level=logging.ERROR)
 
 
 def getImpurityArray(directory, impurityColour, zIndex):

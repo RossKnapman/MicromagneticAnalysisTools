@@ -9,7 +9,7 @@ Code I use for analysing data from MuMax3.
 - [x] Fix animation bug where it doesn't move
 - [x] Fix colour bug plog where e.g. m = [-0.005441933153905671, 6.66444601810444e-19, 0.9999851925721442] is magenta instead of white
 - [x] Fix bug with quiver plot where step size != 1 messes it up
-- [ ] Stop it from spamming "Clipping input data..."
+- [x] Stop it from spamming "Clipping input data..."
 - [ ] Delete redundant functions e.g. COM calculation that does not go to a comoving frame
 - [ ] Some functions (e.g. `vecToRGB`) should be moved to a separate `utils.py` directory
 - [ ] 'Proper' docstrings

@@ -1,6 +1,5 @@
 *.pyc
 *.json
-# *.ovf
 *.mp4
 *.npy
 *.png
@@ -20,3 +19,5 @@ venv
 # Distribution/packaging
 *.egg-info/
 .eggs/
+
+build/*

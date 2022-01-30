@@ -1,5 +1,5 @@
-discretisedfield==0.8.13
-findiff==0.8.9
-numpy==1.21.0
-pandas==1.2.5
-scipy==1.7.0
+discretisedfield>=0.8.13
+findiff>=0.8.9
+numpy>=1.21.0
+pandas>=1.2.5
+scipy>=1.7.0

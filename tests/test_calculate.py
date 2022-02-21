@@ -1,6 +1,7 @@
 import pytest
 from MicromagneticAnalysisTools import Calculate
 import numpy as np
+import os
 
 
 def test_skyrmion_number_trivial():
@@ -51,3 +52,29 @@ def test_hopf_index():
         m = compressed['m']
 
     assert np.abs(1. - Calculate.HopfIdx(m)) < 0.05
+
+
+def test_helicity_calculation():
+
+    """ Test helicity calculation using various sample skyrmion ovf files. (All have helicity 0 unless stated otherwise in file name.) """
+
+    tol = 1e-2  # Tolerance for helicity calculation
+    helicity_test_dir = 'tests/data/helicity_tests/'
+    
+    for filename in os.listdir(helicity_test_dir):
+
+        # Deal with where the helicity is explicitly given in file name
+        if filename == 'helicity_0.ovf':
+            assert np.abs(Calculate.skyrmion_helicity(helicity_test_dir + filename)) < tol
+        
+        elif filename == 'helicity_pi_2.ovf':
+            assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir + filename)) - np.pi/2) < tol
+
+        elif filename == 'helicity_pi.ovf':
+            assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir + filename)) - np.pi) < tol
+
+        elif filename == 'helicity_3_pi_2.ovf':
+            assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir + filename)) - 3*np.pi/2) < tol
+        
+        else:
+            assert np.abs(Calculate.skyrmion_helicity(helicity_test_dir + filename)) < tol

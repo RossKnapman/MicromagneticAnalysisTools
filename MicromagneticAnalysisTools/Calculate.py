@@ -37,7 +37,7 @@ def skyrmionNumberDensity(m, dx, dy, lengthUnits=None):
     return skDensityArray
 
 
-def skyrmionCOM(directory, inFile, edgeCutXFrac, edgeCutYFrac, dx, dy, zIndex):
+def skyrmionCOM(directory, inFile, dx, dy, zIndex=0, edgeCutXFrac=0.1, edgeCutYFrac=0.1):
 
     Lx, Ly = Read.sampleExtent(directory)
 
@@ -77,7 +77,7 @@ def skyrmionCOMArray(directory, edgeCutXFrac=0.1, edgeCutYFrac=0.1, zIndex=0):
         print('Calculating skyrmion position', i,
               'of', len(filesToScan) - 1, end='\r')
         COM[i] = skyrmionCOM(directory, filesToScan[i],
-                             edgeCutXFrac, edgeCutYFrac, dx, dy, zIndex)
+            dx, dy, zIndex, edgeCutXFrac, edgeCutYFrac)
 
     return COM
 
@@ -267,3 +267,50 @@ def Hopf_density(m, acc=8):
 
     dotProduct = np.einsum('ijkl,ijkl->ijk', F, A)
     return dotProduct
+
+
+def skyrmion_helicity(directory, filename):
+
+    """Calculate the skyrmion helicity from an ovf file.
+    The calculation works by sweeping down the y-axis, and getting the points to the left and right of the
+    centre, which are closest to m_z = 0 (where we define the radius of the skyrmion). We then take the mean
+    helicity of all of these points on the radius.
+    
+    Args:
+        directory (str): The directory containing the ovf file for which the helicity should be calculated.
+        filename (str): The ovf file containing the skyrmion for which the helicity should be calculated.
+
+    Returns:
+        The calculated helicity.
+
+    """
+
+    # Load the magnetization array
+    m = df.Field.fromfile(filename).array
+
+    # Read the cell size
+    dx, dy, dz = Read.sampleDiscretisation(directory)
+
+    # Calculate the centre of mass of the skyrmion
+    com = skyrmionCOM(directory, filename, dx, dy)
+
+    # Get the indices of the cells closest to the centre of mass
+    central_x_idx = int(np.round(com[0] / (dx*1e9)))
+    central_y_idx = int(np.round(com[1] / (dy*1e9)))
+
+    # Get the core polarization of the skyrmion
+    polarization = -1 if m[central_x_idx, central_x_idx, 0, 2] < 0 else 1
+
+    # List to store points on the radius
+    radius_points = []
+
+    for y_idx in range(m.shape[1]):
+    
+        # Check that there are parts of this line that are actually within the skyrmion radius (defined by m_z = 0)
+        if np.any(np.sign(m[:, y_idx, 0, 2]) == np.sign(polarization)):
+
+            # Get points to left and right of centre of skyrmion, on its radius
+            radius_points.append([np.argmin(np.abs(m[:central_x_idx, y_idx, 0, 2])), y_idx])
+            radius_points.append([central_x_idx + np.argmin(np.abs(m[central_x_idx:, y_idx, 0, 2])), y_idx])
+
+     

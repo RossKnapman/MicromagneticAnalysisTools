@@ -138,7 +138,7 @@ def skyrmionCOMArrayCoMoving(directory, zIndex=0, boxSize=None, startFile=None, 
     dx, dy = Read.sampleDiscretisation(directory)[:2]
     COM = np.zeros((len(filesToScan), 2))
     initialFile = filesToScan[0].split('/')[-1]
-    guessX, guessY = skyrmionCOM(directory, initialFile, 0, 0, dx, dy, zIndex)
+    guessX, guessY = skyrmionCOM(directory, initialFile, dx, dy, zIndex=zIndex, edgeCutXFrac=0., edgeCutYFrac=0.)
 
     for i in range(len(filesToScan)):
         print('Calculating skyrmion position', i,
@@ -281,7 +281,7 @@ def skyrmion_helicity(directory, filename):
         filename (str): The ovf file containing the skyrmion for which the helicity should be calculated.
 
     Returns:
-        The calculated helicity in the rance [2, 2pi].
+        The calculated helicity.
 
     """
 
@@ -292,7 +292,7 @@ def skyrmion_helicity(directory, filename):
     dx, dy, dz = Read.sampleDiscretisation(directory)
 
     # Calculate the centre of mass of the skyrmion
-    com = skyrmionCOM(directory, filename, dx, dy)
+    com = skyrmionCOM(directory, filename, dx, dy, edgeCutXFrac=0., edgeCutYFrac=0.)
 
     # Get the indices of the cells closest to the centre of mass
     central_x_idx = int(np.round(com[0] / (dx*1e9)))
@@ -304,7 +304,7 @@ def skyrmion_helicity(directory, filename):
     # List to store points on the radius (as indices of array)
     radius_points = []
 
-    # Loop through y-values, getting x-values that are on the skyrmion boundary
+    # Loop through y-values, getting x-values that are on the skyrmion boundary (thanks to Robin Msiska for the inspration)
     for y_idx in range(m.shape[1]):
     
         # Check that there are parts of this line that are actually within the skyrmion radius (defined by m_z = 0)
@@ -339,5 +339,4 @@ def skyrmion_helicity(directory, filename):
         # Save helicity values (we add phi as arctan2 returns in the range [-pi, pi])
         helicities[i] = phi - plane_angle
 
-    # plt.savefig('Test.png')
     return np.average(helicities)

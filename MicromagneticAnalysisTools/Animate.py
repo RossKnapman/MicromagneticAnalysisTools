@@ -11,7 +11,7 @@ from MicromagneticAnalysisTools import Calculate
 plt.rcdefaults()  # Reset stylesheet imported by discretisedfield
 
 
-def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", out_name="Movie.mp4", initialMinValue=0, initialMaxValue=0):
+def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTextFormat="{:.2f}", out_name="Movie.mp4", initialMinValue=0, initialMaxValue=0, fps=25):
     """ Outputs an animation of a generic quantity (e.g. Nsk, energy, current) over time. The input arrays are to be given as file names, e.g. Nsk.npy, Time.npy. """
 
     t = timeArray * 1e9
@@ -81,7 +81,7 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
                                    interval=25, blit=False, save_count=len(quantityArray))
     plt.tight_layout()
 
-    anim.save(out_name, fps=25, writer='ffmpeg')
+    anim.save(out_name, fps=fps, writer='ffmpeg')
 
 
 def NskAnimation(NskArray, timeArray):
@@ -133,7 +133,7 @@ class MagnetizationAnimator:
         self.plot_impurity = plot_impurity
         self.plot_pinning = plot_pinning
         self.show_component = show_component
-        self.interpolation=interpolation
+        self.interpolation = interpolation
         self.limits = limits
         self.length_units  = length_units
         self.step = step
@@ -223,7 +223,6 @@ class MagnetizationAnimator:
 
         return [start_x_idx, end_x_idx, start_y_idx, end_y_idx]
 
-
     def _update_magnetization_array(self, full_file):
 
         magnetization_array = df.Field.fromfile(full_file).array[:, :, self.z_index, :]
@@ -273,6 +272,7 @@ class MagnetizationAnimator:
             self.limits_indices[2]: self.limits_indices[3]]
         magnetization_array = magnetization_array.reshape(
                 magnetization_array.shape[0], magnetization_array.shape[1], 3)
+        self.quiver_plot.set_UVC(magnetization_array[:, :, 0].transpose(), magnetization_array[:, :, 1].transpose())
 
     def _update_marker_position(self, i):
 

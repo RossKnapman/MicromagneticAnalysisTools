@@ -274,14 +274,15 @@ def skyrmion_helicity(directory, filename):
     """Calculate the skyrmion helicity from an ovf file.
     The calculation works by sweeping down the y-axis, and getting the points to the left and right of the
     centre, which are closest to m_z = 0 (where we define the radius of the skyrmion). We then take the mean
-    helicity of all of these points on the radius.
+    helicity of all of these points on the radius. We assume that the system is a thin film, i.e. that the
+    system only has one layer along the z-axis.
     
     Args:
         directory (str): The directory containing the ovf file for which the helicity should be calculated.
         filename (str): The ovf file containing the skyrmion for which the helicity should be calculated.
 
     Returns:
-        The calculated helicity.
+        The calculated helicity (between -pi and pi).
 
     """
 
@@ -336,7 +337,41 @@ def skyrmion_helicity(directory, filename):
         # Calculate polar coordinate of in-plane components of magnetization
         phi = np.arctan2(m[x_idx, y_idx, 0, 1], m[x_idx, y_idx, 0, 0])
 
-        # Save helicity values (we add phi as arctan2 returns in the range [-pi, pi])
+        # Save helicity values
         helicities[i] = phi - plane_angle
 
+    for i in range(len(helicities)):
+        while helicities[i] > np.pi:
+            helicities[i] -= 2*np.pi            
+        while helicities[i] < -np.pi:
+            helicities[i] += 2*np.pi
+
     return np.average(helicities)
+
+
+def skyrmion_helicity_array(directory, startFile=None, endFile=None):
+    """ Get the Nsk of the simulation over time. The arguments define the area of the sample over which the Nsk array should be calculated. Can either specify in terms of units (i.e. nanometres),
+    of in terms of the fractional length of the system. """
+
+    """Get an array of skyrmion helicities for a given simulation directory.
+
+    Args:
+        directory (str): The directory containing the ovf file for which the helicity should be calculated.
+        startFile (str, optional): The starting file for which the helicity should be calculated.
+        endFile (str, optional): The ending file for which the helicity should be calculated.
+
+    Returns:
+        Array of calculated helicities.
+
+    """
+
+    filesToScan = Read.getFilesToScan(directory, startFile, endFile)
+
+    helicities = np.zeros(len(filesToScan), dtype=float)
+
+    for i in range(len(filesToScan)):
+
+        print("Calculating helicity", i, "of", len(filesToScan) - 1, end='\r')
+        helicities[i] = skyrmion_helicity(directory, filesToScan[i])
+
+    return helicities

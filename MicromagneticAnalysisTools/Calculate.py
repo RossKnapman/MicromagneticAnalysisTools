@@ -281,12 +281,12 @@ def skyrmion_helicity(directory, filename):
         filename (str): The ovf file containing the skyrmion for which the helicity should be calculated.
 
     Returns:
-        The calculated helicity.
+        The calculated helicity in the rance [2, 2pi].
 
     """
 
     # Load the magnetization array
-    m = df.Field.fromfile(filename).array
+    m = df.Field.fromfile(directory + '/' + filename).array
 
     # Read the cell size
     dx, dy, dz = Read.sampleDiscretisation(directory)
@@ -299,11 +299,12 @@ def skyrmion_helicity(directory, filename):
     central_y_idx = int(np.round(com[1] / (dy*1e9)))
 
     # Get the core polarization of the skyrmion
-    polarization = -1 if m[central_x_idx, central_x_idx, 0, 2] < 0 else 1
+    polarization = -1 if m[central_x_idx, central_y_idx, 0, 2] < 0 else 1
 
-    # List to store points on the radius
+    # List to store points on the radius (as indices of array)
     radius_points = []
 
+    # Loop through y-values, getting x-values that are on the skyrmion boundary
     for y_idx in range(m.shape[1]):
     
         # Check that there are parts of this line that are actually within the skyrmion radius (defined by m_z = 0)
@@ -313,4 +314,30 @@ def skyrmion_helicity(directory, filename):
             radius_points.append([np.argmin(np.abs(m[:central_x_idx, y_idx, 0, 2])), y_idx])
             radius_points.append([central_x_idx + np.argmin(np.abs(m[central_x_idx:, y_idx, 0, 2])), y_idx])
 
-     
+    # Get helicities for each point
+    helicities = np.zeros(len(radius_points), dtype=float)
+
+    for i in range(len(helicities)):
+
+        x_idx = radius_points[i][0]
+        y_idx = radius_points[i][1]
+
+        # Get x- and y-position of point in nm
+        x = x_idx * dx * 1e9
+        y = y_idx * dy * 1e9
+
+        # Get displacements from centre of skyrmion
+        x_displacement = x - com[0]
+        y_displacement = y - com[1]
+
+        # Calculate polar coordinate in plane
+        plane_angle = np.arctan2(y_displacement, x_displacement)
+        
+        # Calculate polar coordinate of in-plane components of magnetization
+        phi = np.arctan2(m[x_idx, y_idx, 0, 1], m[x_idx, y_idx, 0, 0])
+
+        # Save helicity values (we add phi as arctan2 returns in the range [-pi, pi])
+        helicities[i] = phi - plane_angle
+
+    # plt.savefig('Test.png')
+    return np.average(helicities)

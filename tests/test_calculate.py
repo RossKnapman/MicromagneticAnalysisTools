@@ -54,27 +54,28 @@ def test_hopf_index():
     assert np.abs(1. - Calculate.HopfIdx(m)) < 0.05
 
 
-def test_helicity_calculation():
+@pytest.mark.parametrize('filename', ['helicity_0.ovf', 'helicity_pi_2.ovf', 'helicity_pi.ovf',
+'helicity_3_pi_2.ovf', 'coarser_discretization.ovf', 'opposite_polarization.ovf', 'squashed.ovf', 'translated.ovf'])
+def test_helicity_calculation(filename):
 
-    """ Test helicity calculation using various sample skyrmion ovf files. (All have helicity 0 unless stated otherwise in file name.) """
+    """ Test helicity calculation for skyrmion with zero helicity. """
 
     tol = 1e-2  # Tolerance for helicity calculation
-    helicity_test_dir = 'tests/data/helicity_tests/'
+
+    helicity_test_dir = 'tests/data/helicity_tests'
     
-    for filename in os.listdir(helicity_test_dir):
+    # Deal with where the helicity is explicitly given in file name
+    if filename == 'helicity_0.ovf':
+        assert np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) < tol
+    
+    elif filename == 'helicity_pi_2.ovf':
+        assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) - np.pi/2) < tol
 
-        # Deal with where the helicity is explicitly given in file name
-        if filename == 'helicity_0.ovf':
-            assert np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) < tol
-        
-        elif filename == 'helicity_pi_2.ovf':
-            assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) - np.pi/2) < tol
+    elif filename == 'helicity_pi.ovf':
+        assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) - np.pi) < tol
 
-        elif filename == 'helicity_pi.ovf':
-            assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) - np.pi) < tol
-
-        elif filename == 'helicity_3_pi_2.ovf':
-            assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) - 3*np.pi/2) < tol
-        
-        else:
-            assert np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) < tol
+    elif filename == 'helicity_3_pi_2.ovf':
+        assert (np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) - 3*np.pi/2) < tol
+    
+    else:
+        assert np.abs(Calculate.skyrmion_helicity(helicity_test_dir, filename)) < tol

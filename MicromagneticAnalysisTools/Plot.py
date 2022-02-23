@@ -125,7 +125,7 @@ class MagnetizationPlotter:
     length_units=None,
     max_skyrmion_density=None,
     step=1,
-    quiver_colour=[1, 1, 1]):
+    quiver_colour=[0, 0, 0]):
         self.plot_type = plot_type
         self.directory = directory
         self.plot_file = plot_file
@@ -219,17 +219,14 @@ class MagnetizationPlotter:
 
         magnetization_array = self.m_array[::self.step, ::self.step, self.z_index, :]
 
-        # Control transparency of arrows (more opaque the more the magnetization is in-plane)
-        alphaArray = np.ones((magnetization_array.shape[0], magnetization_array.shape[1], 4))  # Array of [r, g, b, alpha]
-        alphaArray[:, :, :3] = self.quiver_colour
-        alphaArray[:, :, 3] = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2)
-        alphaArray = alphaArray / np.max(alphaArray)
-        alphaArray = alphaArray.transpose(1, 0, 2)
-        alphaArray = np.interp(alphaArray, (0.4, np.max(alphaArray)), (0, 1))
+        # Get in-plane magnetization value to normalise arrows
+        in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2)
 
-        self.out_plot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose(),
-            magnetization_array[:, :, 1].transpose(), color=np.reshape(alphaArray, (magnetization_array.shape[0] * magnetization_array.shape[1], 4)),
-            units='xy', scale_units='xy', pivot='mid', headwidth=6, headlength=10, headaxislength=10, linewidth=10)
+        colour_array = self._get_quiver_colour_array(magnetization_array)
+
+        self.out_plot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose() / in_plane_magnitude,
+            magnetization_array[:, :, 1].transpose() / in_plane_magnitude, color=colour_array, units='xy', scale_units='xy', pivot='mid',
+            headwidth=6, headlength=10, headaxislength=10, linewidth=5)
 
     def _plot_impurity(self):
         impurity_array = np.flip(getImpurityArray(self.directory, np.array([0, 1, 0, 0.2]), self.z_index)[
@@ -269,6 +266,21 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         self.ax.set_ylim(self.limits[2], self.limits[3])
 
         return self.out_plot
+
+    def _get_quiver_colour_array(self, magnetization_array):  # Get the colour array for the quiver plots
+
+        colour_array = np.ones((magnetization_array.shape[0], magnetization_array.shape[1], 4))  # Array of [r, g, b, alpha]
+
+        # Set the arrow colour to the user-defined colour
+        colour_array[:, :, :3] = self.quiver_colour
+
+        # Get the alpha value based on in-plane magnetization component (perfectly transparent for completely out-of-plane and vice-versa)
+        colour_array[:, :, 3] = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2)
+
+        # Reshape to fit matplotlib quiver convention
+        colour_array = colour_array.transpose(1, 0, 2)
+
+        return np.reshape(colour_array, (magnetization_array.shape[0] * magnetization_array.shape[1], 4))
 
 
 def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMFileName='COM.npy', ax=None, presentationMethod='legend', showStopRamp=False, timeMultiplier=None, speedMultiplier=None, currentMultiplier=None, colorbarLabel=None):

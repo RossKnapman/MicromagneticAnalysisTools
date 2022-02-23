@@ -36,7 +36,7 @@ def test_applying_limits():
     original_array = df.Field.fromfile('tests/data/m000000.ovf').array
     animator = Animate.MagnetizationAnimator('magnetization', 'tests/data', limits=(10, 900, 10, 300))
     animator.animate()
-    cut_array = animator.colour_plot.get_array()
+    cut_array = animator.magnetization_plot.get_array()
     # The original array has desretisation cell size 1nm in x
     assert cut_array.shape[1] == 890
 
@@ -62,12 +62,6 @@ def test_magnetization_animation():
 
 def test_magnetization_animation_with_frozen_spins():
     animator = Animate.MagnetizationAnimator('magnetization', 'tests/data', plot_pinning=True)
-    animator.animate()
-
-
-def test_magnetization_animation_with_quiver():
-    """ Test magnetization animation with quiver plot. """
-    animator = Animate.MagnetizationAnimator('magnetization', 'tests/data', quiver=True)
     animator.animate()
 
 

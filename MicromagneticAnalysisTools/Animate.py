@@ -78,7 +78,7 @@ def oneDQuantity(quantityArray, timeArray, yLabel, quantityTextValue, quantityTe
     print("Producing animation", out_name)
 
     anim = animation.FuncAnimation(fig, updateAnim, dataIterator, init_func=init,
-                                   interval=25, blit=False, save_count=len(quantityArray))
+                                   blit=False, save_count=len(quantityArray))
     plt.tight_layout()
 
     anim.save(out_name, fps=fps, writer='ffmpeg')
@@ -112,11 +112,11 @@ class MagnetizationAnimator:
     plot_impurity=None,
     plot_pinning=None,
     show_component=False,
-    quiver=False,
     interpolation=None,
     limits=None,
     length_units=None,
     step=1,
+    quiver_colour=[1., 1., 1.],
     start_file = None,
     end_file = None,
     rectangle_fracs = None,
@@ -129,7 +129,6 @@ class MagnetizationAnimator:
         self.com_array_file = com_array_file
         self.component = component
         self.show_time = show_time
-        self.quiver = quiver
         self.plot_impurity = plot_impurity
         self.plot_pinning = plot_pinning
         self.show_component = show_component
@@ -137,6 +136,7 @@ class MagnetizationAnimator:
         self.limits = limits
         self.length_units  = length_units
         self.step = step
+        self.quiver_colour = quiver_colour
         self.start_file = start_file
         self.end_file = end_file
         self.rectangle_fracs = rectangle_fracs
@@ -158,20 +158,15 @@ class MagnetizationAnimator:
             else:
                 raise ValueError('If supplying an axis, also need to supply a figure.')
 
-        # Ensure the centre of mass marker colour fits with the colour scheme
+        # Ensure the centre of mass marker colour is easily visible with the colour scheme
         self.marker_colour = 'green' if 'magnetization' in self.plot_type else 'red'
 
-        plotter = Plot.MagnetizationPlotter(self.plot_type, self.directory, self.files_to_scan[0],
+        self.plotter = Plot.MagnetizationPlotter(self.plot_type, self.directory, self.files_to_scan[0],
         ax=self.ax, z_index=self.z_index, component=self.component, plot_impurity=self.plot_impurity,
         plot_pinning=self.plot_pinning, show_component=self.show_component, interpolation=self.interpolation,
         limits=self.limits, length_units=self.length_units, step=self.step)
 
-        self.colour_plot = plotter.plot()
-
-        if self.quiver:
-            quiver_plotter = Plot.MagnetizationPlotter('quiver', self.directory, self.files_to_scan[0],
-            ax=self.ax, step=self.step, limits=self.limits)
-            self.quiver_plot = quiver_plotter.plot()
+        self.magnetization_plot = self.plotter.plot()
 
         if self.com_array_file:
             self.com_array = np.load(self.com_array_file)
@@ -231,7 +226,7 @@ class MagnetizationAnimator:
             self.limits_indices[2]: self.limits_indices[3]]
             
         plot_array = Plot.vecToRGB(magnetization_array).transpose(1, 0, 2)
-        self.colour_plot.set_array(plot_array)
+        self.magnetization_plot.set_array(plot_array)
 
     def _update_magnetization_single_component_array(self, full_file):
 
@@ -249,7 +244,7 @@ class MagnetizationAnimator:
         elif self.component == 'z':
             new_plot_array = magnetization_array[:, :, self.z_index, 2]
 
-        self.colour_plot.set_array(new_plot_array.transpose())
+        self.magnetization_plot.set_array(new_plot_array.transpose())
 
     def _update_skyrmion_density_array(self, full_file):
 
@@ -263,16 +258,25 @@ class MagnetizationAnimator:
         
         dx, dy = Read.sampleDiscretisation(self.directory)[:2]
         skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).transpose()
-        self.colour_plot.set_array(skyrmion_density_array)
+        self.magnetization_plot.set_array(skyrmion_density_array)
 
     def _update_quiver_array(self, full_file):
 
+        # Load magnetization array and cut depending on user-defined limits
         magnetization_array = df.Field.fromfile(full_file).array[:, :, self.z_index, :]
         magnetization_array = magnetization_array[self.limits_indices[0]: self.limits_indices[1],
             self.limits_indices[2]: self.limits_indices[3]]
+        
+        # Remove the z-axis as only plotting in 2D plane
         magnetization_array = magnetization_array.reshape(
                 magnetization_array.shape[0], magnetization_array.shape[1], 3)
-        self.quiver_plot.set_UVC(magnetization_array[:, :, 0].transpose(), magnetization_array[:, :, 1].transpose())
+        
+        # Update arrow directions 
+        self.magnetization_plot.set_UVC(magnetization_array[:, :, 0].transpose(), magnetization_array[:, :, 1].transpose())
+
+        # Update arrow colours
+        colour_array = self.plotter._get_quiver_colour_array(magnetization_array)
+        self.magnetization_plot.set_facecolors(colour_array)
 
     def _update_marker_position(self, i):
 
@@ -315,15 +319,14 @@ class MagnetizationAnimator:
             elif self.plot_type == 'skyrmion_density':
                 self._update_skyrmion_density_array(full_file)
 
-            else:
-                raise ValueError('Plot type must be one of: magnetization, magnetization_single_component, \
-                    skyrmion_density.')
+            elif self.plot_type == 'quiver':
+                self._update_quiver_array(full_file)
 
-            if self.quiver: self._update_quiver_array(full_file)
             if self.com_array_file: self._update_marker_position(i)
 
+        plt.savefig('Test.png')
         anim = animation.FuncAnimation(
-                self.fig, update_anim, iter(range(len(self.files_to_scan))), interval=25, blit=False, save_count=len(self.files_to_scan))         
+                self.fig, update_anim, iter(range(len(self.files_to_scan))), blit=False, save_count=len(self.files_to_scan))         
 
         if self.out_name is None:
 
@@ -352,4 +355,3 @@ class MagnetizationAnimator:
                     self.out_name = 'SkDensity.mp4'
 
         anim.save(self.out_name, fps=25, writer='ffmpeg')
-

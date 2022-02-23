@@ -220,10 +220,9 @@ class MagnetizationPlotter:
         magnetization_array = self.m_array[::self.step, ::self.step, self.z_index, :]
 
         # Get in-plane magnetization value to normalise arrows
-        in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2)
+        in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2).transpose()
 
         colour_array = self._get_quiver_colour_array(magnetization_array)
-
         self.out_plot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose() / in_plane_magnitude,
             magnetization_array[:, :, 1].transpose() / in_plane_magnitude, color=colour_array, units='xy', scale_units='xy', pivot='mid',
             headwidth=6, headlength=10, headaxislength=10, linewidth=5)
@@ -279,6 +278,9 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
 
         # Reshape to fit matplotlib quiver convention
         colour_array = colour_array.transpose(1, 0, 2)
+
+        # Should already be between 0 and 1, but sometimes we get e.g. 1.0000001, which causes a ValueError from matplotlib
+        colour_array[np.where(colour_array > 1.)] = 1.
 
         return np.reshape(colour_array, (magnetization_array.shape[0] * magnetization_array.shape[1], 4))
 

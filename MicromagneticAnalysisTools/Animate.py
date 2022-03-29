@@ -324,7 +324,6 @@ class MagnetizationAnimator:
 
             if self.com_array_file: self._update_marker_position(i)
 
-        plt.savefig('Test.png')
         anim = animation.FuncAnimation(
                 self.fig, update_anim, iter(range(len(self.files_to_scan))), blit=False, save_count=len(self.files_to_scan))         
 

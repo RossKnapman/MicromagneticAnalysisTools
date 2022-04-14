@@ -276,6 +276,8 @@ def skyrmion_helicity(directory, filename):
     centre, which are closest to m_z = 0 (where we define the radius of the skyrmion). We then take the mean
     helicity of all of these points on the radius. We assume that the system is a thin film, i.e. that the
     system only has one layer along the z-axis.
+
+    IMPORTANT: We assume a single skyrmion in a collinear background!
     
     Args:
         directory (str): The directory containing the ovf file for which the helicity should be calculated.
@@ -340,20 +342,47 @@ def skyrmion_helicity(directory, filename):
         # Save helicity values
         helicities[i] = phi - plane_angle
 
+    # Deal with helicities that are outside of the range [-pi, pi]
     for i in range(len(helicities)):
         while helicities[i] > np.pi:
             helicities[i] -= 2*np.pi            
         while helicities[i] < -np.pi:
             helicities[i] += 2*np.pi
 
-    return np.average(helicities)
+    # Below, deal with the case that the helicity is close to pi, such that some values have
+    # helicity ≈ -pi and other have helicity ≈ pi
+
+    # If absolute value of helicity is close to pi, and there is a mixture of positive and negative helicities
+    if np.abs(np.mean(np.abs(helicities)) - np.pi) < np.pi/4 and np.any(helicities > 0) and np.any(helicities < 0):
+
+            # Instead get angle w.r.t. pi direction (-x), to avoid discontinous point at helicity = pi or -pi
+            anglesToMinusX = np.zeros_like(helicities, dtype=float)
+
+            for i in range(len(anglesToMinusX)):
+
+                if helicities[i] >= 0:
+                    anglesToMinusX[i] = np.pi - helicities[i]
+                
+                else:
+                    anglesToMinusX[i] = -np.pi - helicities[i]
+                    
+            averageAngleToMinusX = np.mean(anglesToMinusX)
+
+            if averageAngleToMinusX >= 0:
+                return np.pi - averageAngleToMinusX
+            
+            else:
+                return -np.pi - averageAngleToMinusX
+
+    else:
+        return np.average(helicities)
 
 
 def skyrmion_helicity_array(directory, startFile=None, endFile=None):
-    """ Get the Nsk of the simulation over time. The arguments define the area of the sample over which the Nsk array should be calculated. Can either specify in terms of units (i.e. nanometres),
-    of in terms of the fractional length of the system. """
 
     """Get an array of skyrmion helicities for a given simulation directory.
+
+    IMPORTANT: We assume a single skyrmion in a collinear background!
 
     Args:
         directory (str): The directory containing the ovf file for which the helicity should be calculated.

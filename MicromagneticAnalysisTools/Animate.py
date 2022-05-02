@@ -353,4 +353,12 @@ class MagnetizationAnimator:
                 else:
                     self.out_name = 'SkDensity.mp4'
 
+            elif self.plot_type == 'quiver':
+                if self.start_file or self.limits:
+                    # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
+                    self.out_name = 'QuiverPart.mp4'
+
+                else:
+                    self.out_name = 'Quiver.mp4'
+
         anim.save(self.out_name, fps=25, writer='ffmpeg')

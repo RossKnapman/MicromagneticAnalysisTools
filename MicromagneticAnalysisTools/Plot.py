@@ -253,7 +253,7 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
 
         else:
             raise ValueError('Plot type must be one of: magnetization, magnetization_single_component, \
-                skyrmion_density.')
+                skyrmion_density, quiver.')
 
         if self.plot_impurity: self._plot_impurity()
         if self.plot_pinning: self._plot_pinning()

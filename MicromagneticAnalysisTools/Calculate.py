@@ -22,9 +22,9 @@ def skyrmionNumberDensity(m, dx, dy, lengthUnits=None):
     This vectorised calculation is ~1000 faster than two for loops for getting the derivatives. """
 
     # args: axis, lattice constant, derivative order, accuracy
-    d_dx = findiff.FinDiff(0, 1, 1, acc=8)
+    d_dx = findiff.FinDiff(0, 1, 1, acc=4)
     # args: axis, lattice constant, derivative order, accuracy
-    d_dy = findiff.FinDiff(1, 1, 1, acc=8)
+    d_dy = findiff.FinDiff(1, 1, 1, acc=4)
 
     if lengthUnits:
         dx /= lengthUnits
@@ -49,9 +49,9 @@ def skyrmionCOM(directory, inFile, dx, dy, zIndex=0, edgeCutXFrac=0.1, edgeCutYF
 
     # Define operators
     # args: axis, lattice constant, derivative order, accuracy
-    d_dx = findiff.FinDiff(0, 1, 1, acc=8)
+    d_dx = findiff.FinDiff(0, 1, 1, acc=4)
     # args: axis, lattice constant, derivative order, accuracy
-    d_dy = findiff.FinDiff(1, 1, 1, acc=8)
+    d_dy = findiff.FinDiff(1, 1, 1, acc=4)
 
     # Apply them to m
     mdx = d_dx(m)

@@ -1,7 +1,5 @@
-.. _api:
-
-MicromagneticAnalysisTools.Animate
-==================================
+``MicromagneticAnalysisTools.Animate``
+======================================
 
 .. automodule:: MicromagneticAnalysisTools.Animate
     :members:

@@ -1,7 +1,5 @@
-.. _api:
-
-MicromagneticAnalysisTools.Read
-===============================
+``MicromagneticAnalysisTools.Read``
+===================================
 
 .. automodule:: MicromagneticAnalysisTools.Read
     :members:

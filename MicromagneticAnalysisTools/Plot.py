@@ -1,3 +1,7 @@
+"""
+Tools for plotting simulation data and associated quantities.
+"""
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

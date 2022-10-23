@@ -1,7 +1,5 @@
-.. _api:
-
-MicromagneticAnalysisTools.Calculate
-====================================
+``MicromagneticAnalysisTools.Calculate``
+========================================
 
 .. automodule:: MicromagneticAnalysisTools.Calculate
     :members:

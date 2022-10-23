@@ -1,3 +1,7 @@
+"""
+Tools for calculating quantities from simulation data.
+"""
+
 import numpy as np
 import discretisedfield as df
 import findiff
@@ -6,8 +10,15 @@ from MicromagneticAnalysisTools import Read
 
 
 def skyrmionNumber(m):
-    """ Get the skyrmion number given a magnetisation array of shape (Nx, Ny, 1, 3) for a given z.
-    This vectorised calculation is ~1000 faster than two for loops for getting the derivatives. """
+    """Calculate the skyrmion number for a magnetization array of shape `(Nx, Ny, 1, 3)`, for a given z.
+
+    Args:
+        m (ndarray): Array of shape `(Nx, Ny, 1, 3)`.
+
+    Returns:
+        The skyrmion number of the texture in the array.
+
+    """
 
     mdx = np.diff(m, axis=0)[:, :-1]
     mdy = np.diff(m, axis=1)[:-1, :]
@@ -18,8 +29,15 @@ def skyrmionNumber(m):
 
 
 def skyrmionNumberDensity(m, dx, dy, lengthUnits=None):
-    """ Get the skyrmion number given a magnetisation array of shape (Nx, Ny, 1, 3) for a given z.
-    This vectorised calculation is ~1000 faster than two for loops for getting the derivatives. """
+    """Calculate the skyrmion number density of a magnetic texture contained in an array of shape `(Nx, Ny, 1, 3)`
+
+    Args:
+        m (ndarray): Array of shape `(Nx, Ny, 1, 3)`.
+
+    Returns:
+        Two-dimensional array of skyrmion number densities over the x-y plane.
+
+    """
 
     # args: axis, lattice constant, derivative order, accuracy
     d_dx = findiff.FinDiff(0, 1, 1, acc=4)
@@ -38,6 +56,21 @@ def skyrmionNumberDensity(m, dx, dy, lengthUnits=None):
 
 
 def skyrmionCOM(directory, inFile, dx, dy, zIndex=0, edgeCutXFrac=0.1, edgeCutYFrac=0.1):
+    """Calculate the centre of the skyrmion by obtaining the "centre of mass" of the skyrmion number density.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        inFile (str): The filename for which to calculate the skyrmion's centre.
+        dx (float64): The simulation cell size in the x-dimension, in nm.
+        dy (float64): The simulation cell size in the y-dimension, in nm.
+        zIndex (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+        edgeCutXFrac (float64, optional): The fraction of the system along the x-axis that should be cut off at the edges (thus allowing edge effects to be excluded).
+        edgeCutYFrac (float64, optional): Same as above but for the y-axis.
+
+    Returns:
+        A two-element array of the form `[x-coordinate of centre of skyrmion, y-coordinate of centre of skyrmion]`.
+
+    """
 
     Lx, Ly = Read.sampleExtent(directory)
 
@@ -67,7 +100,18 @@ def skyrmionCOM(directory, inFile, dx, dy, zIndex=0, edgeCutXFrac=0.1, edgeCutYF
 
 
 def skyrmionCOMArray(directory, edgeCutXFrac=0.1, edgeCutYFrac=0.1, zIndex=0):
-    """ Gets an array of the x, y position of the skyrmion centre of mass over the course of the simulation. """
+    """Get an array of the centre of mass of the skyrmion over the entire simulation.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        edgeCutXFrac (float64, optional): The fraction of the system along the x-axis that should be cut off at the edges (thus allowing edge effects to be excluded).
+        edgeCutYFrac (float64, optional): Same as above but for the y-axis.
+        zIndex (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+
+    Returns:
+        Array of centres of mass over the entire simulation, of the shape `(Number of files, 2)`.
+
+    """
 
     filesToScan = Read.getFilesToScan(directory)
     dx, dy = Read.sampleDiscretisation(directory)[:2]
@@ -83,7 +127,22 @@ def skyrmionCOMArray(directory, edgeCutXFrac=0.1, edgeCutYFrac=0.1, zIndex=0):
 
 
 def skyrmionCOMCoMoving(directory, inFile, dx, dy, zIndex, guessX, guessY, boxSize=None):
-    """ Calculate the skyrmion's position by converting to a co-moving frame, which allows seamlessness with PBCs. """
+    """Calculate the skyrmion's position by converting to a co-moving frame, which allows seamlessness with PBCs. 
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        inFile (str): The filename for which to calculate the skyrmion's centre.
+        dx (float64): The simulation cell size in the x-dimension, in nm.
+        dy (float64): The simulation cell size in the y-dimension, in nm.
+        zIndex (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+        guessX (float64): Initial guess of the skyrmion's x-position, in cells.
+        guessY (float64): Initial guess of the skyrmion's y-position, in cells.
+        boxSize (float64, optional): Size of the box around the guess centre of mass in nm, to avoid integrating over the entire system.
+
+    Returns:
+        A two-element array of the form `[x-coordinate of centre of skyrmion, y-coordinate of centre of skyrmion]`.
+
+    """
 
     Lx = Read.sampleExtent(directory)[0]
 
@@ -132,7 +191,19 @@ def skyrmionCOMCoMoving(directory, inFile, dx, dy, zIndex, guessX, guessY, boxSi
 
 
 def skyrmionCOMArrayCoMoving(directory, zIndex=0, boxSize=None, startFile=None, endFile=None):
+    """Get an array of the centre of mass of the skyrmion over the entire simulation=, using a co-moving frame, allowing seamlessness when using PBCs.
 
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        zIndex (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+        boxSize (float64, optional): Size of the box around the guess centre of mass in nm, to avoid integrating over the entire system.
+        startFile (str, optional): The starting file for which the helicity should be calculated.
+        endFile (str, optional): The ending file for which the helicity should be calculated.
+
+    Returns:
+        Array of centres of mass over the entire simulation, of the shape `(Number of files, 2)`.
+
+    """
     filesToScan = Read.getFilesToScan(
         directory, startFile=startFile, endFile=endFile)
     dx, dy = Read.sampleDiscretisation(directory)[:2]
@@ -151,15 +222,34 @@ def skyrmionCOMArrayCoMoving(directory, zIndex=0, boxSize=None, startFile=None, 
 
 
 def getRampIdx(directory, component):
-    """ Get the index of the point in the simulation (i.e. 0 -> m000000.ovf, 1-> m000001.ovf, ...) where the current reaches a constant. Note that we assume the current to be monotonically increasing. """
+    """Get the index of the point in the simulation (e.g. 0 -> m000000.ovf, 1-> m000001.ovf, ...) where the current reaches a constant.
+    Note that we assume the current to be monotonically increasing.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        component (str): The direction in which the current is running; can be x, y, or z.
+
+    Returns:
+        The index at which the current stops ramping.
+
+    """
 
     currentArray = Read.simulationCurrentArray(directory, component)
-
     return np.searchsorted(currentArray, 0.999999999*np.max(currentArray))
 
 
 def speedAgainstTime(times, COM, component):
-    """ Return the speed of the skyrmion as an array. """
+    """Return the speed of the skyrmion as an array.
+
+    Args:
+        times (ndarray): Times array of simulation, calculated using :py:func:`MicromagneticAnalysisTools.Read.simulationTimeArray()`.
+        COM (ndarray): The array of centre positions of the skyrmion, calculated using :py:func:`MicromagneticAnalysisTools.Calculate.skyrmionCOMArray` or :py:func:`MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving`.
+        component (str): The component for which the speed should be measured (x or y).
+
+    Returns:
+        An array of speed against time in the specified direction.
+
+    """
 
     if component == 'x':
         return np.gradient(COM[:, 0] * 1e-9, times)
@@ -172,14 +262,44 @@ def speedAgainstTime(times, COM, component):
 
 
 def getMeanSpeed(times, COM, rampIdx, component):
-    """ Get the mean x-component of the skyrmion velocity over time. Only consider values obtained after ramping has finished. """
+    """Get the mean x-component of the skyrmion velocity over time. Only consider values obtained after ramping has finished.
+
+    Args:
+        times (ndarray): Times array of simulation, calculated using :py:func:`MicromagneticAnalysisTools.Read.simulationTimeArray()`.
+        COM (ndarray): The array of centre positions of the skyrmion, calculated using :py:func:`MicromagneticAnalysisTools.Calculate.skyrmionCOMArray` or :py:func:`MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving`.
+        rampIdx (int): Index at which the current ramping stops, calculated usign :py:func:`MicromagneticAnalysisTools.Calculate.getRampIdx`.
+        component (str): The component for which the speed should be measured (x or y).
+
+    Returns:
+        The average speed along the specified direction over the course of the simulation.
+
+    """
 
     return np.average(speedAgainstTime(times[rampIdx:], COM[rampIdx:], component))
 
 
 def NskArray(directory, zIndex=0, startFile=None, endFile=None, calculateFromX=None, calculateToX=None, calculateFromY=None, calculateToY=None, startXFrac=0, endXFrac=1, startYFrac=0, endYFrac=1):
-    """ Get the Nsk of the simulation over time. The arguments define the area of the sample over which the Nsk array should be calculated. Can either specify in terms of units (i.e. nanometres),
-    of in terms of the fractional length of the system. """
+    """Get the Nsk of the simulation over time. The arguments define the area of the sample over which the Nsk array should be calculated. Can either specify in terms of units (i.e. nanometres),
+    of in terms of the fractional length of the system.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        zIndex (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+        startFile (str, optional): The simulation file from which the counting should start (i.e. skipping over files at the beginning).
+        endFile (str, optional): The simulation at which the counting shold end.
+        calculateFromX (float, optional): The value of x in nm from which the skyrmion number calculation should start (e.g. cutting off edge effects).
+        calcualteToX(float, optional): The value of x in nm to which the skyrmion number calculation should start (e.g. cutting off edge effects).
+        calculateFromY (float, optional): As above, but in the y-direction.
+        calculateToY (float, optional): As above, but in the y-direction.
+        startXFrac (float, optional): Like above, but with fractions rather than nm.
+        endXFrac (float, optional): Like above, but with fractions rather than nm.
+        startYFrac (float, optional): Like above, but with fractions rather than nm.
+        startYFrac (float, optional): Like above, but with fractions rather than nm.
+
+    Returns:
+        A 1D array of the skyrmion number over the course of the simulation, for each file.
+
+    """
 
     filesToScan = Read.getFilesToScan(directory, startFile, endFile)
 
@@ -211,8 +331,16 @@ def NskArray(directory, zIndex=0, startFile=None, endFile=None, calculateFromX=N
 
 
 def HopfIdx(m, acc=8):
+    """Calculate the Hopf index of a magnetization vector field of shape `(Nx, Ny, Nz, 3)`.
 
-    """ Calculate the Hopf index of a magnetization vector field of shape (x_length, y_length, z_length, 3). """
+    Args:
+        m (ndarray): Magnetization array of the shape `(Nx, Ny, Nz, 3)`.
+        acc (int, optional): Order of the accuracy for which the derivatives should be calculated (see `findiff documentation <https://findiff.readthedocs.io/en/latest/index.html>`_).
+
+    Returns:
+        The calculated Hopf index of the texture.
+    
+    """
     
     d_dx = findiff.FinDiff(0, 1, 1, acc=acc)  # args: axis, lattice constant, derivative order, accuracy
     d_dy = findiff.FinDiff(1, 1, 1, acc=acc)
@@ -241,8 +369,16 @@ def HopfIdx(m, acc=8):
 
 
 def Hopf_density(m, acc=8):
+    """Calculate the Hopf index density of a magnetization vector field of shape `(Nx, Ny, Nz, 3)`.
+
+    Args:
+        m (ndarray): Magnetization array of the shape `(Nx, Ny, Nz, 3)`.
+        acc (int, optional): Order of the accuracy for which the derivatives should be calculated (see `findiff documentation <https://findiff.readthedocs.io/en/latest/index.html>`_).
+
+    Returns:
+        Array of Hopf index density of the system, of the shape `(Nx, Ny, Nz)`.
     
-    """ Calculate the Hopf index density of a magnetization vector field of shape (x_length, y_length, z_length, 3). """
+    """
 
     d_dx = findiff.FinDiff(0, 1, 1, acc=acc)  # args: axis, lattice constant, derivative order, accuracy
     d_dy = findiff.FinDiff(1, 1, 1, acc=acc)
@@ -381,8 +517,7 @@ def skyrmion_helicity(directory, filename):
 def skyrmion_helicity_array(directory, startFile=None, endFile=None):
 
     """Get an array of skyrmion helicities for a given simulation directory.
-
-    IMPORTANT: We assume a single skyrmion in a collinear background!
+    Note that this only works for a single skyrmion in a collinear background.
 
     Args:
         directory (str): The directory containing the ovf file for which the helicity should be calculated.

@@ -1,7 +1,5 @@
-.. _api:
-
-MicromagneticAnalysisTools.Plot
-===============================
+``MicromagneticAnalysisTools.Plot``
+===================================
 
 .. automodule:: MicromagneticAnalysisTools.Plot
     :members:

@@ -110,6 +110,8 @@ def vecToRGB(m):
 
 class MagnetizationPlotter:
 
+    """ Docstring """
+
     def __init__(self,
     plot_type,
     directory,

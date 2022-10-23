@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MicromagneticAnalysisTools.Calculate &mdash; MicromagneticAnalysisTools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MicromagneticAnalysisTools.Plot" href="plot.html" />
+    <link rel="prev" title="MicromagneticAnalysisTools.Read" href="read.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> MicromagneticAnalysisTools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="read.html"><code class="docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Read</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.HopfIdx"><code class="docutils literal notranslate"><span class="pre">HopfIdx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.Hopf_density"><code class="docutils literal notranslate"><span class="pre">Hopf_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.NskArray"><code class="docutils literal notranslate"><span class="pre">NskArray()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.getMeanSpeed"><code class="docutils literal notranslate"><span class="pre">getMeanSpeed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.getRampIdx"><code class="docutils literal notranslate"><span class="pre">getRampIdx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOM"><code class="docutils literal notranslate"><span class="pre">skyrmionCOM()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArray"><code class="docutils literal notranslate"><span class="pre">skyrmionCOMArray()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving"><code class="docutils literal notranslate"><span class="pre">skyrmionCOMArrayCoMoving()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMCoMoving"><code class="docutils literal notranslate"><span class="pre">skyrmionCOMCoMoving()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionNumber"><code class="docutils literal notranslate"><span class="pre">skyrmionNumber()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionNumberDensity"><code class="docutils literal notranslate"><span class="pre">skyrmionNumberDensity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmion_helicity"><code class="docutils literal notranslate"><span class="pre">skyrmion_helicity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmion_helicity_array"><code class="docutils literal notranslate"><span class="pre">skyrmion_helicity_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.speedAgainstTime"><code class="docutils literal notranslate"><span class="pre">speedAgainstTime()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plot.html"><code class="docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Plot</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="animate.html"><code class="docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Animate</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">MicromagneticAnalysisTools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li><code class="docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/calculate.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-MicromagneticAnalysisTools.Calculate">
+<span id="micromagneticanalysistools-calculate"></span><h1><code class="docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate</span></code><a class="headerlink" href="#module-MicromagneticAnalysisTools.Calculate" title="Permalink to this heading"></a></h1>
+<p>Tools for calculating quantities from simulation data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.HopfIdx">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">HopfIdx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.HopfIdx" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the Hopf index of a magnetization vector field of shape <cite>(Nx, Ny, Nz, 3)</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>ndarray</em>) – Magnetization array of the shape <cite>(Nx, Ny, Nz, 3)</cite>.</p></li>
+<li><p><strong>acc</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of the accuracy for which the derivatives should be calculated (see <a class="reference external" href="https://findiff.readthedocs.io/en/latest/index.html">findiff documentation</a>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The calculated Hopf index of the texture.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.Hopf_density">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">Hopf_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.Hopf_density" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the Hopf index density of a magnetization vector field of shape <cite>(Nx, Ny, Nz, 3)</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>ndarray</em>) – Magnetization array of the shape <cite>(Nx, Ny, Nz, 3)</cite>.</p></li>
+<li><p><strong>acc</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>Order of the accuracy for which the derivatives should be calculated (see <a class="reference external" href="https://findiff.readthedocs.io/en/latest/index.html">findiff documentation</a>).</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of Hopf index density of the system, of the shape <cite>(Nx, Ny, Nz)</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.NskArray">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">NskArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zIndex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculateFromX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculateToX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculateFromY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculateToY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startXFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endXFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startYFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endYFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.NskArray" title="Permalink to this definition"></a></dt>
+<dd><p>Get the Nsk of the simulation over time. The arguments define the area of the sample over which the Nsk array should be calculated. Can either specify in terms of units (i.e. nanometres),
+of in terms of the fractional length of the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory in which the simulation data is stored.</p></li>
+<li><p><strong>zIndex</strong> (<em>int</em><em>, </em><em>optional</em>) – The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).</p></li>
+<li><p><strong>startFile</strong> (<em>str</em><em>, </em><em>optional</em>) – The simulation file from which the counting should start (i.e. skipping over files at the beginning).</p></li>
+<li><p><strong>endFile</strong> (<em>str</em><em>, </em><em>optional</em>) – The simulation at which the counting shold end.</p></li>
+<li><p><strong>calculateFromX</strong> (<em>float</em><em>, </em><em>optional</em>) – The value of x in nm from which the skyrmion number calculation should start (e.g. cutting off edge effects).</p></li>
+<li><p><strong>calcualteToX</strong> (<em>float</em><em>, </em><em>optional</em>) – The value of x in nm to which the skyrmion number calculation should start (e.g. cutting off edge effects).</p></li>
+<li><p><strong>calculateFromY</strong> (<em>float</em><em>, </em><em>optional</em>) – As above, but in the y-direction.</p></li>
+<li><p><strong>calculateToY</strong> (<em>float</em><em>, </em><em>optional</em>) – As above, but in the y-direction.</p></li>
+<li><p><strong>startXFrac</strong> (<em>float</em><em>, </em><em>optional</em>) – Like above, but with fractions rather than nm.</p></li>
+<li><p><strong>endXFrac</strong> (<em>float</em><em>, </em><em>optional</em>) – Like above, but with fractions rather than nm.</p></li>
+<li><p><strong>startYFrac</strong> (<em>float</em><em>, </em><em>optional</em>) – Like above, but with fractions rather than nm.</p></li>
+<li><p><strong>startYFrac</strong> – Like above, but with fractions rather than nm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 1D array of the skyrmion number over the course of the simulation, for each file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.getMeanSpeed">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">getMeanSpeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">COM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rampIdx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.getMeanSpeed" title="Permalink to this definition"></a></dt>
+<dd><p>Get the mean x-component of the skyrmion velocity over time. Only consider values obtained after ramping has finished.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>times</strong> (<em>ndarray</em>) – Times array of simulation, calculated using <a class="reference internal" href="read.html#MicromagneticAnalysisTools.Read.simulationTimeArray" title="MicromagneticAnalysisTools.Read.simulationTimeArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Read.simulationTimeArray()</span></code></a>.</p></li>
+<li><p><strong>COM</strong> (<em>ndarray</em>) – The array of centre positions of the skyrmion, calculated using <a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArray" title="MicromagneticAnalysisTools.Calculate.skyrmionCOMArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate.skyrmionCOMArray()</span></code></a> or <a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving" title="MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving()</span></code></a>.</p></li>
+<li><p><strong>rampIdx</strong> (<em>int</em>) – Index at which the current ramping stops, calculated usign <a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.getRampIdx" title="MicromagneticAnalysisTools.Calculate.getRampIdx"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate.getRampIdx()</span></code></a>.</p></li>
+<li><p><strong>component</strong> (<em>str</em>) – The component for which the speed should be measured (x or y).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The average speed along the specified direction over the course of the simulation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.getRampIdx">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">getRampIdx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.getRampIdx" title="Permalink to this definition"></a></dt>
+<dd><p>Get the index of the point in the simulation (e.g. 0 -&gt; m000000.ovf, 1-&gt; m000001.ovf, …) where the current reaches a constant.
+Note that we assume the current to be monotonically increasing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory in which the simulation data is stored.</p></li>
+<li><p><strong>component</strong> (<em>str</em>) – The direction in which the current is running; can be x, y, or z.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The index at which the current stops ramping.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmionCOM">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmionCOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zIndex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeCutXFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeCutYFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOM" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the centre of the skyrmion by obtaining the “centre of mass” of the skyrmion number density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory in which the simulation data is stored.</p></li>
+<li><p><strong>inFile</strong> (<em>str</em>) – The filename for which to calculate the skyrmion’s centre.</p></li>
+<li><p><strong>dx</strong> (<em>float64</em>) – The simulation cell size in the x-dimension, in nm.</p></li>
+<li><p><strong>dy</strong> (<em>float64</em>) – The simulation cell size in the y-dimension, in nm.</p></li>
+<li><p><strong>zIndex</strong> (<em>int</em><em>, </em><em>optional</em>) – The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).</p></li>
+<li><p><strong>edgeCutXFrac</strong> (<em>float64</em><em>, </em><em>optional</em>) – The fraction of the system along the x-axis that should be cut off at the edges (thus allowing edge effects to be excluded).</p></li>
+<li><p><strong>edgeCutYFrac</strong> (<em>float64</em><em>, </em><em>optional</em>) – Same as above but for the y-axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A two-element array of the form <cite>[x-coordinate of centre of skyrmion, y-coordinate of centre of skyrmion]</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmionCOMArray">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmionCOMArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeCutXFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgeCutYFrac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zIndex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArray" title="Permalink to this definition"></a></dt>
+<dd><p>Get an array of the centre of mass of the skyrmion over the entire simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory in which the simulation data is stored.</p></li>
+<li><p><strong>edgeCutXFrac</strong> (<em>float64</em><em>, </em><em>optional</em>) – The fraction of the system along the x-axis that should be cut off at the edges (thus allowing edge effects to be excluded).</p></li>
+<li><p><strong>edgeCutYFrac</strong> (<em>float64</em><em>, </em><em>optional</em>) – Same as above but for the y-axis.</p></li>
+<li><p><strong>zIndex</strong> (<em>int</em><em>, </em><em>optional</em>) – The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of centres of mass over the entire simulation, of the shape <cite>(Number of files, 2)</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmionCOMArrayCoMoving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zIndex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boxSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving" title="Permalink to this definition"></a></dt>
+<dd><p>Get an array of the centre of mass of the skyrmion over the entire simulation=, using a co-moving frame, allowing seamlessness when using PBCs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory in which the simulation data is stored.</p></li>
+<li><p><strong>zIndex</strong> (<em>int</em><em>, </em><em>optional</em>) – The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).</p></li>
+<li><p><strong>boxSize</strong> (<em>float64</em><em>, </em><em>optional</em>) – Size of the box around the guess centre of mass in nm, to avoid integrating over the entire system.</p></li>
+<li><p><strong>startFile</strong> (<em>str</em><em>, </em><em>optional</em>) – The starting file for which the helicity should be calculated.</p></li>
+<li><p><strong>endFile</strong> (<em>str</em><em>, </em><em>optional</em>) – The ending file for which the helicity should be calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of centres of mass over the entire simulation, of the shape <cite>(Number of files, 2)</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmionCOMCoMoving">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmionCOMCoMoving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guessX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guessY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boxSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMCoMoving" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the skyrmion’s position by converting to a co-moving frame, which allows seamlessness with PBCs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory in which the simulation data is stored.</p></li>
+<li><p><strong>inFile</strong> (<em>str</em>) – The filename for which to calculate the skyrmion’s centre.</p></li>
+<li><p><strong>dx</strong> (<em>float64</em>) – The simulation cell size in the x-dimension, in nm.</p></li>
+<li><p><strong>dy</strong> (<em>float64</em>) – The simulation cell size in the y-dimension, in nm.</p></li>
+<li><p><strong>zIndex</strong> (<em>int</em><em>, </em><em>optional</em>) – The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).</p></li>
+<li><p><strong>guessX</strong> (<em>float64</em>) – Initial guess of the skyrmion’s x-position, in cells.</p></li>
+<li><p><strong>guessY</strong> (<em>float64</em>) – Initial guess of the skyrmion’s y-position, in cells.</p></li>
+<li><p><strong>boxSize</strong> (<em>float64</em><em>, </em><em>optional</em>) – Size of the box around the guess centre of mass in nm, to avoid integrating over the entire system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A two-element array of the form <cite>[x-coordinate of centre of skyrmion, y-coordinate of centre of skyrmion]</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmionNumber">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmionNumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmionNumber" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the skyrmion number for a magnetization array of shape <cite>(Nx, Ny, 1, 3)</cite>, for a given z.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>m</strong> (<em>ndarray</em>) – Array of shape <cite>(Nx, Ny, 1, 3)</cite>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The skyrmion number of the texture in the array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmionNumberDensity">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmionNumberDensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lengthUnits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmionNumberDensity" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the skyrmion number density of a magnetic texture contained in an array of shape <cite>(Nx, Ny, 1, 3)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>m</strong> (<em>ndarray</em>) – Array of shape <cite>(Nx, Ny, 1, 3)</cite>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two-dimensional array of skyrmion number densities over the x-y plane.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmion_helicity">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmion_helicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmion_helicity" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the skyrmion helicity from an ovf file.
+The calculation works by sweeping down the y-axis, and getting the points to the left and right of the
+centre, which are closest to m_z = 0 (where we define the radius of the skyrmion). We then take the mean
+helicity of all of these points on the radius. We assume that the system is a thin film, i.e. that the
+system only has one layer along the z-axis.</p>
+<p>IMPORTANT: We assume a single skyrmion in a collinear background!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory containing the ovf file for which the helicity should be calculated.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – The ovf file containing the skyrmion for which the helicity should be calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The calculated helicity (between -pi and pi).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.skyrmion_helicity_array">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">skyrmion_helicity_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.skyrmion_helicity_array" title="Permalink to this definition"></a></dt>
+<dd><p>Get an array of skyrmion helicities for a given simulation directory.
+Note that this only works for a single skyrmion in a collinear background.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory containing the ovf file for which the helicity should be calculated.</p></li>
+<li><p><strong>startFile</strong> (<em>str</em><em>, </em><em>optional</em>) – The starting file for which the helicity should be calculated.</p></li>
+<li><p><strong>endFile</strong> (<em>str</em><em>, </em><em>optional</em>) – The ending file for which the helicity should be calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of calculated helicities.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MicromagneticAnalysisTools.Calculate.speedAgainstTime">
+<span class="sig-prename descclassname"><span class="pre">MicromagneticAnalysisTools.Calculate.</span></span><span class="sig-name descname"><span class="pre">speedAgainstTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">COM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MicromagneticAnalysisTools.Calculate.speedAgainstTime" title="Permalink to this definition"></a></dt>
+<dd><p>Return the speed of the skyrmion as an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>times</strong> (<em>ndarray</em>) – Times array of simulation, calculated using <a class="reference internal" href="read.html#MicromagneticAnalysisTools.Read.simulationTimeArray" title="MicromagneticAnalysisTools.Read.simulationTimeArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Read.simulationTimeArray()</span></code></a>.</p></li>
+<li><p><strong>COM</strong> (<em>ndarray</em>) – The array of centre positions of the skyrmion, calculated using <a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArray" title="MicromagneticAnalysisTools.Calculate.skyrmionCOMArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate.skyrmionCOMArray()</span></code></a> or <a class="reference internal" href="#MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving" title="MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving"><code class="xref py py-func docutils literal notranslate"><span class="pre">MicromagneticAnalysisTools.Calculate.skyrmionCOMArrayCoMoving()</span></code></a>.</p></li>
+<li><p><strong>component</strong> (<em>str</em>) – The component for which the speed should be measured (x or y).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An array of speed against time in the specified direction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="read.html" class="btn btn-neutral float-left" title="MicromagneticAnalysisTools.Read" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot.html" class="btn btn-neutral float-right" title="MicromagneticAnalysisTools.Plot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ross Knapman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

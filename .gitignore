@@ -20,4 +20,6 @@ venv
 *.egg-info/
 .eggs/
 
+# Builds
 build/*
+docs/build

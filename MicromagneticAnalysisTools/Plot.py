@@ -1,3 +1,7 @@
+"""
+Tools for plotting simulation data and associated quantities.
+"""
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -109,6 +113,8 @@ def vecToRGB(m):
 
 
 class MagnetizationPlotter:
+
+    """ Docstring """
 
     def __init__(self,
     plot_type,

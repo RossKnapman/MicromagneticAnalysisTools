@@ -1,3 +1,7 @@
+"""
+Tools for reading in simulation files.
+"""
+
 import os
 import pandas as pd
 import discretisedfield as df

@@ -22,4 +22,4 @@ venv
 
 # Builds
 build/*
-docs/build
+docs/build/*

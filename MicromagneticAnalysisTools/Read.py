@@ -13,6 +13,15 @@ import warnings
 
 def getInitialFile(directory):
     """ Get the name of the intial file of the simulation (as I call them different things: Relaxed.ovf, and m000000.ovf). """
+    """Get the name of the intial file of the simulation (as I call them different things: Relaxed.ovf, and m000000.ovf). 
+    
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        
+    Returns:
+        The path to the initial file of the simulation.
+
+    """
 
     if os.path.isfile(directory + "/Relaxed.ovf"):
         return directory + "/Relaxed.ovf"

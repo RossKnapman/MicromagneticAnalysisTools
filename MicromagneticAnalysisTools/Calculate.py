@@ -33,6 +33,9 @@ def skyrmionNumberDensity(m, dx, dy, lengthUnits=None):
 
     Args:
         m (ndarray): Array of shape `(Nx, Ny, 1, 3)`.
+        dx (float64): The simulation cell size in the x-dimension, in nm.
+        dy (float64): The simulation cell size in the y-dimension, in nm.
+        lengthUnits(float64, optional): Amount by which to scale discretisation (which rescales number density).
 
     Returns:
         Two-dimensional array of skyrmion number densities over the x-y plane.

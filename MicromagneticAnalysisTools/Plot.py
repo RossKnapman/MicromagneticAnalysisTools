@@ -140,8 +140,27 @@ def vecToRGB(m):
 
 
 class MagnetizationPlotter:
+    """Class for dealing with plotting magnetization texture.
 
-    """ Docstring """
+    Attributes:
+        plot_type (str): The style of the plot, which can be "magnetization" which plots a HSL colour plot, "magnetization_single_component"
+            which plots a single component specified by the `component` attribute, "skyrmion_density", which plots skyrmion density, or
+            "quiver", which shows arrows.
+        directory (str): The directory in which the simulation data is stored.
+        plot_file (str): The file to be plotted (e.g. "m000231.ovf").
+        ax (matplotlib.axis.Axis): The Matplotlib axis on which to plot.
+        z_index (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+        component (str, optional): For the case that `plot_type` is `magnetization_single_component`, this speficied the component.
+        plot_impurity (bool, optional): Whether or not to plot an impurity (e.g. region of modified uniaxial anisotropy).
+        plot_pinning (bool, optional): Whether or not to plot a region in which the spins are frozen (shown in semi-transparent grey).
+        interpolation (str, optional): Interpolation method used for the colour plots (passed to `matplotlib.pyplot.imshow`).
+        limits (List[int], optional): Limits in which to plot (in nm) of the form `[x_min, x_max, y_min, y_max]`.
+        length_units(float64, optional): Amount by which to scale discretisation (which rescales number density).
+        max_skyrmion_density(float64, optional): The maximum skyrmion number density to be plotted (corresponds to vmax and -vmin in `imshow`).
+        step (int, optional): For the quiver plot, how many cells should be skipped between points.
+        quiver_colour (List[float64], optional): List of form `[R, G, B]` for colour of arrows.
+    
+    """
 
     def __init__(self,
     plot_type,
@@ -271,6 +290,12 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         self.ax.imshow(pinning_array, extent=self.limits)
 
     def plot(self):
+        """Plots the magnetization plot.
+
+        Returns:
+            The magnetization plot.
+        
+        """
 
         if self.plot_type == 'magnetization':
             self._plot_magnetization()

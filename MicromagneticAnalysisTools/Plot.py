@@ -17,7 +17,15 @@ logging.getLogger('matplotlib').setLevel(level=logging.ERROR)
 
 
 def getImpurityArray(directory, impurityColour, zIndex):
-    """ Returns an array used to plot the impurity on a colour plot. The colour is of the form of a NumPy array [R, G, B, alpha]. """
+    """
+    Returns an array used to plot the impurity on a colour plot.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        impurityColour (ndarray): Colour of the impurity, which should be a NumPy array of the form [R, G, B, Alpha].
+        zIndex (int): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample). For a 2D sample, should be 0.
+    
+    """
 
     impurityFile = directory + '/' + 'K.ovf'
     K = df.Field.fromfile(impurityFile).array[:, :, zIndex, :]
@@ -31,7 +39,16 @@ def getImpurityArray(directory, impurityColour, zIndex):
 
 
 def getPinningArray(directory):
-    """ Returns an array used to plot the pinned region on a colour plot. """
+    """
+    Returns an array used to plot the pinned region on a colour plot.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+
+    Returns:
+        Array of regions that are pinned (used to plot pinned region on colour plot with grey overlay).
+    
+    """
 
     pinningFile = directory + '/' + 'FrozenSpins.ovf'
     frozen = df.Field.fromfile(pinningFile).array[:, :, 0, 0]
@@ -43,7 +60,17 @@ def getPinningArray(directory):
 
 
 def vecToRGB(m):
-    """ Vectorised version of colorsys.hls_to_rgb """
+    """
+    Allows for HLS colour plot of magnetization without having to manually loop pixel-by-pixel.
+    Essentially a vectorised version of colorsys.hls_to_rgb.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+
+    Returns:
+        An array of shape `(Nx, Ny, 3)`, where the final axis is contains the [R, G, B] values.
+    
+    """
 
     m[np.where(m == -0.)] = 0.  # Change -0. to 0.
 
@@ -113,8 +140,27 @@ def vecToRGB(m):
 
 
 class MagnetizationPlotter:
+    """Class for dealing with plotting magnetization texture.
 
-    """ Docstring """
+    Attributes:
+        plot_type (str): The style of the plot, which can be "magnetization" which plots a HSL colour plot, "magnetization_single_component"
+            which plots a single component specified by the `component` attribute, "skyrmion_density", which plots skyrmion density, or
+            "quiver", which shows arrows.
+        directory (str): The directory in which the simulation data is stored.
+        plot_file (str): The file to be plotted (e.g. "m000231.ovf").
+        ax (matplotlib.axis.Axis): The Matplotlib axis on which to plot.
+        z_index (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
+        component (str, optional): For the case that `plot_type` is `magnetization_single_component`, this speficied the component.
+        plot_impurity (bool, optional): Whether or not to plot an impurity (e.g. region of modified uniaxial anisotropy).
+        plot_pinning (bool, optional): Whether or not to plot a region in which the spins are frozen (shown in semi-transparent grey).
+        interpolation (str, optional): Interpolation method used for the colour plots (passed to `matplotlib.pyplot.imshow`).
+        limits (List[int], optional): Limits in which to plot (in nm) of the form `[x_min, x_max, y_min, y_max]`.
+        length_units(float64, optional): Amount by which to scale discretisation (which rescales number density).
+        max_skyrmion_density(float64, optional): The maximum skyrmion number density to be plotted (corresponds to vmax and -vmin in `imshow`).
+        step (int, optional): For the quiver plot, how many cells should be skipped between points.
+        quiver_colour (List[float64], optional): List of form `[R, G, B]` for colour of arrows.
+    
+    """
 
     def __init__(self,
     plot_type,
@@ -244,6 +290,12 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         self.ax.imshow(pinning_array, extent=self.limits)
 
     def plot(self):
+        """Plots the magnetization plot.
+
+        Returns:
+            The magnetization plot.
+        
+        """
 
         if self.plot_type == 'magnetization':
             self._plot_magnetization()
@@ -292,7 +344,28 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
 
 
 def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMFileName='COM.npy', ax=None, presentationMethod='legend', showStopRamp=False, timeMultiplier=None, speedMultiplier=None, currentMultiplier=None, colorbarLabel=None):
-    """ For a given directory, plot the speeds of the skyrmions in the respective sub-directories. """
+    """
+    For a given directory, plot the speeds of the skyrmions in the respective sub-directories.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        currentcomponent (str): The component of the current to be read. Must be "x", "y", or "z".
+        currentcomponent (str): The component of the speed to be calculated. Must be "x", "y", or "z".
+        COMFileName (str, optional): The filename of the NumPy array containing skyrmion centre positions (calculated using e.g. skyrmion COMArray()).
+        ax (matplotlib.axis.Axis): The Matplotlib axis on which to plot.
+        presentationMethod (str, optional): The method used to distinguish between different quantites being plotted; either "legend" or "colormap".
+            For example, say we want to plot skyrmion speed as a function of current for varies damping constants 0.01, 0.02, ..., 0.10. We could
+            either have a legend showing the colour for each constant ("legend"), or make the line for 0.01 light and increasingly dark until 0.10
+            ("colormap").
+        showStopRamp (bool): Whether or not to draw a vertical line where the current stops ramping.
+        timeMultiplier (float): Quantity by which to multiply the times array in seconds (e.g. to convert to dimensionless units).
+        energyMultiplier (float): Quantity by which to multiply the energy array in Joules (e.g. to convert to dimensionless units).
+        speedMultiplier (float): Quantity by which to multiply the energy array in m/s (e.g. to convert to dimensionless units).
+        currentMultiplier (float): Quantity by which to multiply the current array in A (e.g. to convert to dimensionless units),
+            if the quantity being varied for different plots is current
+        colorBarLabel (str): The label of the colour bar.
+    
+    """
 
     if ax is None:
         ax = plt.subplots()[1]
@@ -320,6 +393,7 @@ def plotSpeedOverSimulations(directories, currentComponent, speedComponent, COMF
         if speedMultiplier:
             speeds *= speedMultiplier
 
+        # TODO Change this name; the quantity does not necessarily need to be current
         current = directory.split('/')[-1]
         if currentMultiplier:
             current = str(currentMultiplier * float(current))

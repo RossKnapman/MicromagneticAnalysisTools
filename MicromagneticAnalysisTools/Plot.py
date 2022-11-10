@@ -17,7 +17,7 @@ logging.getLogger('matplotlib').setLevel(level=logging.ERROR)
 
 
 def getImpurityArray(directory, impurityColour, zIndex):
-    """ Returns an array used to plot the impurity on a colour plot. The colour is of the form of a numpy array [R, G, B, alpha]. """
+    """ Returns an array used to plot the impurity on a colour plot. The colour is of the form of a NumPy array [R, G, B, alpha]. """
 
     impurityFile = directory + '/' + 'K.ovf'
     K = df.Field.fromfile(impurityFile).array[:, :, zIndex, :]

@@ -46,7 +46,22 @@ def getInitialFile(directory):
 
 
 def simulationTimeArray(directory, loadMethod="table", startFile=None, endFile=None):
-    """ Reads the time of a simulation and outputs an array. We can either do this by loading the table output by the MuMax, or we can obtain the timestamp of each file in the simulation. """
+    """
+    Reads the time of a simulation and outputs an array. We can either do this by loading the table output by the MuMax,
+    or we can obtain the timestamp of each file in the simulation.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        loadMethod (str): The method by which the time data is loaded; must be either "files", which reads the timestamps
+            of the simulation files (slower) or "table", which reads table.txt.
+        startFile (str, optional): The starting file for which the helicity should be calculated.
+        endFile (str, optional): The ending file for which the helicity should be calculated.
+
+    Returns:
+    The array of times in the simulation in seconds.
+    
+    """
+
 
     if startFile:
         loadMethod = "files"
@@ -72,7 +87,17 @@ def simulationTimeArray(directory, loadMethod="table", startFile=None, endFile=N
 
 
 def simulationCurrentArray(directory, component):
-    """ Reads the current of a simulation and outputs an array. Component can be x, y, z. """
+    """
+    Reads the current of a simulation and outputs an array. Component can be x, y, z.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        component (str): The component of the current to be read. Must be "x", "y", or "z".
+
+    Returns:
+        Array of currents in the specified direction during the simulation, in A/m^2.
+    
+    """
 
     df = pd.read_csv(directory + '/table.txt', delimiter='\t')
     # Negative as the electron charge is negative
@@ -82,7 +107,16 @@ def simulationCurrentArray(directory, component):
 
 
 def simulationEnergyArray(directory):
-    """ Read the energy fo a simulation and outputs an array. """
+    """
+    Read the energy of a simulation and outputs an array.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+
+    Returns:
+        Array of (total) energy during the simulation in J.
+    
+    """
 
     df = pd.read_csv(directory + '/table.txt', delimiter='\t')
     energyArray = df['E_total (J)'].to_numpy()
@@ -91,7 +125,16 @@ def simulationEnergyArray(directory):
 
 
 def fileTime(file):
-    """ Reads the total simulation time given the name of a .ovf file. """
+    """
+    Reads the total simulation time given the name of a .ovf file.
+
+    Args:
+        file (str): The ovf file for which the simulation time should be obtained. Full path required.
+
+    Returns:
+        The time of the file.
+    
+    """
 
     with open(file, "rb") as ovffile:
         f = ovffile.read()
@@ -104,7 +147,18 @@ def fileTime(file):
 
 
 def getFilesToScan(directory, startFile=None, endFile=None):
-    """ Outputs a sorted list of .ovf files which are to be parsed. """
+    """
+    Outputs a sorted list of .ovf files which are to be parsed.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+        startFile (str, optional): The starting file for which the helicity should be calculated.
+        endFile (str, optional): The ending file for which the helicity should be calculated.
+
+    Returns:
+        Sorted list of ovf files to be processed.
+    
+    """
 
     filesToScan = []
 
@@ -127,7 +181,16 @@ def getFilesToScan(directory, startFile=None, endFile=None):
 
 
 def sampleDiscretisation(directory):
-    """ Get spatial extent of the sample in nm. """
+    """
+    Get descretization size of cells in m.
+
+    Args: 
+        directory (str): The directory in which the simulation data is stored.
+
+    Returns:
+        Cell discretization dx, dy, dz.
+    
+    """
 
     initialFile = getInitialFile(directory)
 
@@ -146,6 +209,18 @@ def sampleDiscretisation(directory):
 
 
 def sampleExtent(directory):
+    """
+    Get the sample extent in nm.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+
+    Returns:
+        Sample extent Lx, Ly in nm.
+
+    """
+
+    # Does it makes sense to have some functions that output nm and others that output m?
 
     dx, dy = sampleDiscretisation(directory)[:2]
     mInit = initialFileArray(directory)
@@ -158,7 +233,16 @@ def sampleExtent(directory):
 
 
 def initialFileArray(directory):
-    """ Get the initial .ovf file of the simulation as a numpy array. """
+    """
+    Get the initial .ovf file of the simulation as a NumPy array.
+
+    Args:
+        directory (str): The directory in which the simulation data is stored.
+
+    Returns:
+        Initial file as `(Nx, Ny, 3)` NumPy array.
+    
+    """
 
     initialFile = getInitialFile(directory)
     mInit = df.Field.fromfile(initialFile).array

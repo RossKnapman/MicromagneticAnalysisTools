@@ -5,7 +5,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name="MicromagneticAnalysisTools",
-    version="0.0.9",
+    version="0.0.10",
     description="A collection of tools to analyse data from MuMax3.",
     author="Ross Knapman",
     author_email="rjknapman@gmail.com",

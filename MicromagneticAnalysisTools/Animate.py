@@ -248,7 +248,7 @@ class MagnetizationAnimator:
         elif self.component == 'z':
             new_plot_array = magnetization_array[:, :, self.z_index, 2]
 
-        self.magnetization_plot.set_array(new_plot_array.transpose())
+        self.magnetization_plot.set_array(new_plot_array.T)
 
     def _update_skyrmion_density_array(self, full_file):
 
@@ -261,7 +261,7 @@ class MagnetizationAnimator:
             magnetization_array.shape[1], 3)
         
         dx, dy = Read.sampleDiscretisation(self.directory)[:2]
-        skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).transpose()
+        skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).T
         self.magnetization_plot.set_array(skyrmion_density_array)
 
     def _update_quiver_array(self, full_file):
@@ -270,13 +270,19 @@ class MagnetizationAnimator:
         magnetization_array = df.Field.fromfile(full_file).array[:, :, self.z_index, :]
         magnetization_array = magnetization_array[self.limits_indices[0]: self.limits_indices[1],
             self.limits_indices[2]: self.limits_indices[3]]
-        
+
         # Remove the z-axis as only plotting in 2D plane
         magnetization_array = magnetization_array.reshape(
                 magnetization_array.shape[0], magnetization_array.shape[1], 3)
         
+        # Skip points specified by the step parameter
+        magnetization_array = magnetization_array[::self.step, ::self.step, :]
+
+        # Get in-plane magnetization value to normalise arrows
+        in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2).T
+        
         # Update arrow directions 
-        self.magnetization_plot.set_UVC(magnetization_array[:, :, 0].transpose(), magnetization_array[:, :, 1].transpose())
+        self.magnetization_plot.set_UVC(magnetization_array[:, :, 0].T / in_plane_magnitude, magnetization_array[:, :, 1].T / in_plane_magnitude)
 
         # Update arrow colours
         colour_array = self.plotter._get_quiver_colour_array(magnetization_array)

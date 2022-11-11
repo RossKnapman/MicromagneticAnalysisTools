@@ -235,7 +235,7 @@ class MagnetizationPlotter:
         elif self.component == 'z':
             plot_array = self.m_array[:, :, self.z_index, 2]
 
-        self.out_plot = self.ax.imshow(plot_array.transpose(), animated=True, vmin=-1, vmax=1, origin='lower',
+        self.out_plot = self.ax.imshow(plot_array.T, animated=True, vmin=-1, vmax=1, origin='lower',
             cmap='RdBu_r', interpolation=self.interpolation, extent=self.limits)
 
         if self.show_component:
@@ -248,7 +248,7 @@ class MagnetizationPlotter:
 
         dx, dy = Read.sampleDiscretisation(self.directory)[:2]
 
-        skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).transpose()
+        skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).T
 
         if self.max_skyrmion_density:
             colour_map_max = self.max_skyrmion_density
@@ -269,14 +269,15 @@ class MagnetizationPlotter:
         X = X[::self.step, ::self.step]
         Y = Y[::self.step, ::self.step]
 
+        # Skip points specified by the step parameter
         magnetization_array = self.m_array[::self.step, ::self.step, self.z_index, :]
 
         # Get in-plane magnetization value to normalise arrows
-        in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2).transpose()
+        in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2).T
 
         colour_array = self._get_quiver_colour_array(magnetization_array)
-        self.out_plot = self.ax.quiver(Y.transpose(), X.transpose(), magnetization_array[:, :, 0].transpose() / in_plane_magnitude,
-            magnetization_array[:, :, 1].transpose() / in_plane_magnitude, color=colour_array, units='xy', scale_units='xy', pivot='mid',
+        self.out_plot = self.ax.quiver(Y.T, X.T, magnetization_array[:, :, 0].T / in_plane_magnitude,
+            magnetization_array[:, :, 1].T / in_plane_magnitude, color=colour_array, units='xy', scale_units='xy', pivot='mid',
             headwidth=6, headlength=10, headaxislength=10, linewidth=5)
 
     def _plot_impurity(self):

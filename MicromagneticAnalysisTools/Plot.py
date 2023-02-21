@@ -208,6 +208,10 @@ class MagnetizationPlotter:
 
         if self.ax == None: self.ax = plt.subplots()[1]
 
+        # If length units are supplied, we want to rescale the axis extent
+        if self.length_units:
+            self.limits = list(map(lambda x: 1e-9 * x / length_units, self.limits))
+
     def _get_limits_indices(self):
 
         start_x_idx = int(np.round((self.limits[0] / self.Lx) * self.m_array.shape[0]))
@@ -317,8 +321,8 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         if self.plot_impurity: self._plot_impurity()
         if self.plot_pinning: self._plot_pinning()
 
-        self.ax.set_xlabel(r'$x$ (nm)')
-        self.ax.set_ylabel(r'$y$ (nm)')
+        self.ax.set_xlabel(r'$x$ (nm)' if not self.length_units else r'$x$ (dimensionless)')
+        self.ax.set_ylabel(r'$y$ (nm)' if not self.length_units else r'$y$ (dimensionless)')
         self.ax.set_aspect('equal')
         self.ax.set_xlim(self.limits[0], self.limits[1])
         self.ax.set_ylim(self.limits[2], self.limits[3])

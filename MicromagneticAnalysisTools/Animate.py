@@ -329,7 +329,8 @@ class MagnetizationAnimator:
 
             if self.show_time:
                 self.file_text.set_text('File: ' + self.files_to_scan[i])
-                self.time_text.set_text('$t$ = ' + "{:.2f}".format(Read.fileTime(full_file) * 1e9) + " ns")
+                self.time_text.set_text('$t$ = ' + "{:.2f}".format(Read.fileTime(full_file) * 1e9) + " ns" if not self.time_units else
+                                        '$t$ = ' "{:.2f}".format(Read.fileTime(full_file) / self.time_units))
 
             if self.plot_type == 'magnetization':
                 self._update_magnetization_array(full_file)

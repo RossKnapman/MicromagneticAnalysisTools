@@ -113,6 +113,7 @@ class MagnetizationAnimator:
     com_array_file = None,
     component=None,
     show_time=False,
+    time_units=None,
     plot_impurity=None,
     plot_pinning=None,
     show_component=False,
@@ -133,6 +134,7 @@ class MagnetizationAnimator:
         self.com_array_file = com_array_file
         self.component = component
         self.show_time = show_time
+        self.time_units = time_units
         self.plot_impurity = plot_impurity
         self.plot_pinning = plot_pinning
         self.show_component = show_component
@@ -151,6 +153,7 @@ class MagnetizationAnimator:
 
         self.Lx, self.Ly = Read.sampleExtent(self.directory)
         self.m_array = df.Field.fromfile(self.directory + '/' + self.files_to_scan[0]).array
+        if self.limits == None: self.limits = [0., self.Lx, 0., self.Ly]
         self.limits_indices = self._get_limits_indices()
 
         # Offset the centre of mass array index if we do not start the animation at the beginning of the simulation
@@ -180,15 +183,23 @@ class MagnetizationAnimator:
 
         if self.show_time:
 
-            if self.limits:
-                self.file_text = self.ax.text(0.5 * (self.limits[1] - self.limits[0]) + self.limits[0],
-                            1.1 * (self.limits[3] - self.limits[2]) + self.limits[2], "")
-                self.time_text = self.ax.text(
-                    self.limits[0], 1.1 * (self.limits[3] - self.limits[2]) + self.limits[2], "")
+            file_text_x = 0.5 * (self.limits[1] - self.limits[0]) + self.limits[0]
+            file_text_y = 1.1 * (self.limits[3] - self.limits[2]) + self.limits[2]
+            time_text_x = self.limits[0]
+            time_text_y = 1.1 * (self.limits[3] - self.limits[2]) + self.limits[2]
 
-            else:
-                self.file_text = self.ax.text(0.5*self.Lx, 1.1*self.Ly, "")
-                self.time_text = self.ax.text(0, 1.1*self.Ly, "")
+            print(file_text_x)
+
+            if length_units:
+                file_text_x /= 1e9*length_units
+                file_text_y /= 1e9*length_units
+                time_text_x /= 1e9*length_units
+                time_text_y /= 1e9*length_units
+
+            print(file_text_x)
+
+            self.file_text = self.ax.text(file_text_x, file_text_y, "")
+            self.time_text = self.ax.text(time_text_x, time_text_y, "")
 
     def _get_limits_indices(self):
 

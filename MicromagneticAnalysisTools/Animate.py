@@ -107,11 +107,12 @@ class MagnetizationAnimator:
     def __init__(self,
     plot_type,
     directory,
-    fig = None,
-    ax = None,
-    z_index = 0,
-    com_array_file = None,
+    fig=None,
+    ax=None,
+    z_index=0,
+    com_array_file=None,
     component=None,
+    plot_quiver=False,
     show_time=False,
     time_units=None,
     plot_impurity=None,
@@ -133,6 +134,7 @@ class MagnetizationAnimator:
         self.z_index = z_index
         self.com_array_file = com_array_file
         self.component = component
+        self.plot_quiver = plot_quiver
         self.show_time = show_time
         self.time_units = time_units
         self.plot_impurity = plot_impurity
@@ -168,12 +170,23 @@ class MagnetizationAnimator:
         # Ensure the centre of mass marker colour is easily visible with the colour scheme
         self.marker_colour = 'green' if 'magnetization' in self.plot_type else 'red'
 
-        self.plotter = Plot.MagnetizationPlotter(self.plot_type, self.directory, self.files_to_scan[0],
-        ax=self.ax, z_index=self.z_index, component=self.component, plot_impurity=self.plot_impurity,
-        plot_pinning=self.plot_pinning, show_component=self.show_component, interpolation=self.interpolation,
-        limits=self.limits, length_units=self.length_units, step=self.step)
+        if plot_type == 'quiveronly': self.plot_quiver = True
 
-        self.magnetization_plot = self.plotter.plot()
+        self.plotter = Plot.MagnetizationPlotter(self.plot_type, self.directory, self.files_to_scan[0],
+        ax=self.ax, z_index=self.z_index, component=self.component, plot_quiver=self.plot_quiver, 
+        plot_impurity=self.plot_impurity, plot_pinning=self.plot_pinning, show_component=self.show_component,
+        interpolation=self.interpolation, limits=self.limits, length_units=self.length_units, step=self.step,
+        quiver_colour=self.quiver_colour)
+
+        if self.plot_quiver:
+            if plot_type == 'quiveronly':
+                self.quiver_plot = self.plotter.plot()
+            else:
+                self.colour_plot, self.quiver_plot = self.plotter.plot()
+
+        else:
+            self.colour_plot = self.plotter.plot()
+
 
         if self.com_array_file:
             self.com_array = np.load(self.com_array_file)
@@ -241,7 +254,7 @@ class MagnetizationAnimator:
             self.limits_indices[2]: self.limits_indices[3]]
             
         plot_array = Plot.vecToRGB(magnetization_array).transpose(1, 0, 2)
-        self.magnetization_plot.set_array(plot_array)
+        self.colour_plot.set_array(plot_array)
 
     def _update_magnetization_single_component_array(self, full_file):
 
@@ -259,7 +272,7 @@ class MagnetizationAnimator:
         elif self.component == 'z':
             new_plot_array = magnetization_array[:, :, self.z_index, 2]
 
-        self.magnetization_plot.set_array(new_plot_array.T)
+        self.colour_plot.set_array(new_plot_array.T)
 
     def _update_skyrmion_density_array(self, full_file):
 
@@ -273,7 +286,7 @@ class MagnetizationAnimator:
         
         dx, dy = Read.sampleDiscretisation(self.directory)[:2]
         skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).T
-        self.magnetization_plot.set_array(skyrmion_density_array)
+        self.colout_plot.set_array(skyrmion_density_array)
 
     def _update_quiver_array(self, full_file):
 
@@ -293,11 +306,11 @@ class MagnetizationAnimator:
         in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2).T
         
         # Update arrow directions 
-        self.magnetization_plot.set_UVC(magnetization_array[:, :, 0].T / in_plane_magnitude, magnetization_array[:, :, 1].T / in_plane_magnitude)
+        self.quiver_plot.set_UVC(magnetization_array[:, :, 0].T / in_plane_magnitude, magnetization_array[:, :, 1].T / in_plane_magnitude)
 
         # Update arrow colours
         colour_array = self.plotter._get_quiver_colour_array(magnetization_array)
-        self.magnetization_plot.set_facecolors(colour_array)
+        self.quiver_plot.set_facecolors(colour_array)
 
     def _update_marker_position(self, i):
 
@@ -332,6 +345,9 @@ class MagnetizationAnimator:
                 self.time_text.set_text('$t$ = ' + "{:.2f}".format(Read.fileTime(full_file) * 1e9) + " ns" if not self.time_units else
                                         '$t$ = ' "{:.2f}".format(Read.fileTime(full_file) / self.time_units))
 
+            if self.plot_quiver:
+                self._update_quiver_array(full_file)
+
             if self.plot_type == 'magnetization':
                 self._update_magnetization_array(full_file)
 
@@ -340,9 +356,6 @@ class MagnetizationAnimator:
 
             elif self.plot_type == 'skyrmion_density':
                 self._update_skyrmion_density_array(full_file)
-
-            elif self.plot_type == 'quiver':
-                self._update_quiver_array(full_file)
 
             if self.com_array_file: self._update_marker_position(i)
 
@@ -375,7 +388,7 @@ class MagnetizationAnimator:
                 else:
                     self.out_name = 'SkDensity.mp4'
 
-            elif self.plot_type == 'quiver':
+            elif self.plot_type == 'quiveronly':
                 if self.start_file or self.limits:
                     # After so much time generating the animation for the full simulation, don't want to overwrite it when looking at part of the simulation
                     self.out_name = 'QuiverPart.mp4'

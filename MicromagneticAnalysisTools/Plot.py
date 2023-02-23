@@ -145,12 +145,13 @@ class MagnetizationPlotter:
     Attributes:
         plot_type (str): The style of the plot, which can be "magnetization" which plots a HSL colour plot, "magnetization_single_component"
             which plots a single component specified by the `component` attribute, "skyrmion_density", which plots skyrmion density, or
-            "quiver", which shows arrows.
+            "quiveronly", which shows arrows.
         directory (str): The directory in which the simulation data is stored.
         plot_file (str): The file to be plotted (e.g. "m000231.ovf").
         ax (matplotlib.axis.Axis): The Matplotlib axis on which to plot.
         z_index (int, optional): The index along the z-axis for which the skyrmion centre should be calculated (for a 3D sample).
         component (str, optional): For the case that `plot_type` is `magnetization_single_component`, this speficied the component.
+        plot_quiver (bool, optional): Whether to plot arrows. Will also be set to True if plot_type is quiveronly but this argument is not given.
         plot_impurity (bool, optional): Whether or not to plot an impurity (e.g. region of modified uniaxial anisotropy).
         plot_pinning (bool, optional): Whether or not to plot a region in which the spins are frozen (shown in semi-transparent grey).
         interpolation (str, optional): Interpolation method used for the colour plots (passed to `matplotlib.pyplot.imshow`).
@@ -169,6 +170,7 @@ class MagnetizationPlotter:
     ax=None,
     z_index=0,
     component=None,
+    plot_quiver=False,
     plot_impurity=False,
     plot_pinning=False,
     show_component=False,
@@ -184,6 +186,7 @@ class MagnetizationPlotter:
         self.ax = ax
         self.z_index = z_index
         self.component = component
+        self.plot_quiver = plot_quiver
         self.plot_impurity = plot_impurity
         self.plot_pinning = plot_pinning
         self.show_component = show_component
@@ -212,6 +215,8 @@ class MagnetizationPlotter:
         if self.length_units:
             self.limits = list(map(lambda x: 1e-9 * x / length_units, self.limits))
 
+        if plot_type == 'quiveronly': self.plot_quiver = True
+
     def _get_limits_indices(self):
 
         start_x_idx = int(np.round((self.limits[0] / self.Lx) * self.m_array.shape[0]))
@@ -225,7 +230,7 @@ class MagnetizationPlotter:
 
         magnetization_array = self.m_array[:, :, self.z_index, :]
         plot_array = vecToRGB(magnetization_array).transpose(1, 0, 2)
-        self.out_plot = self.ax.imshow(plot_array, animated=True, origin='lower',
+        self.colour_plot = self.ax.imshow(plot_array, animated=True, origin='lower',
             interpolation=self.interpolation, extent=self.limits)
 
     def _plot_magnetization_single_component(self):
@@ -239,7 +244,7 @@ class MagnetizationPlotter:
         elif self.component == 'z':
             plot_array = self.m_array[:, :, self.z_index, 2]
 
-        self.out_plot = self.ax.imshow(plot_array.T, animated=True, vmin=-1, vmax=1, origin='lower',
+        self.colour_plot = self.ax.imshow(plot_array.T, animated=True, vmin=-1, vmax=1, origin='lower',
             cmap='RdBu_r', interpolation=self.interpolation, extent=self.limits)
 
         if self.show_component:
@@ -260,7 +265,7 @@ class MagnetizationPlotter:
         else:
             colour_map_max = np.max(np.abs(skyrmion_density_array))
 
-        self.out_plot = self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
+        self.colour_plot = self.ax.imshow(skyrmion_density_array, animated=True, vmin=-1*colour_map_max, vmax=colour_map_max,
             origin='lower', cmap='PRGn', interpolation=self.interpolation, extent=self.limits)
 
     def _plot_quiver(self):
@@ -280,7 +285,7 @@ class MagnetizationPlotter:
         in_plane_magnitude = np.sqrt(magnetization_array[:, :, 0]**2 + magnetization_array[:, :, 1]**2).T
 
         colour_array = self._get_quiver_colour_array(magnetization_array)
-        self.out_plot = self.ax.quiver(Y.T, X.T, magnetization_array[:, :, 0].T / in_plane_magnitude,
+        self.quiver_plot = self.ax.quiver(Y.T, X.T, magnetization_array[:, :, 0].T / in_plane_magnitude,
             magnetization_array[:, :, 1].T / in_plane_magnitude, color=colour_array, units='xy', scale_units='xy', pivot='mid',
             headwidth=6, headlength=10, headaxislength=10, linewidth=5)
 
@@ -298,9 +303,13 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         """Plots the magnetization plot.
 
         Returns:
-            The magnetization plot.
+            The colour plot if quiver plot not specified; the quiver plot if `quiveronly` supplied as `plot_type`;
+            [colour plot, quiver plot] if both specified.
         
         """
+
+        if self.plot_quiver:
+            self._plot_quiver()
 
         if self.plot_type == 'magnetization':
             self._plot_magnetization()
@@ -311,12 +320,12 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         elif self.plot_type == 'skyrmion_density':
             self._plot_skyrmion_density()
 
-        elif self.plot_type == 'quiver':
-            self._plot_quiver()
+        elif self.plot_type == 'quiveronly':
+            pass  # We already plotted the quiver after the first if statement
 
         else:
             raise ValueError('Plot type must be one of: magnetization, magnetization_single_component, \
-                skyrmion_density, quiver.')
+                skyrmion_density, quiveronly.')
 
         if self.plot_impurity: self._plot_impurity()
         if self.plot_pinning: self._plot_pinning()
@@ -327,7 +336,14 @@ self.limits_indices[0]: self.limits_indices[1], self.limits_indices[2]: self.lim
         self.ax.set_xlim(self.limits[0], self.limits[1])
         self.ax.set_ylim(self.limits[2], self.limits[3])
 
-        return self.out_plot
+        if self.plot_quiver:
+            try:
+                return self.colour_plot, self.quiver_plot
+            except AttributeError:  # Quiver only
+                return self.quiver_plot
+
+        else:
+            return self.colour_plot
 
     def _get_quiver_colour_array(self, magnetization_array):  # Get the colour array for the quiver plots
 

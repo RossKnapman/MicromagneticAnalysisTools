@@ -286,7 +286,7 @@ class MagnetizationAnimator:
         
         dx, dy = Read.sampleDiscretisation(self.directory)[:2]
         skyrmion_density_array = Calculate.skyrmionNumberDensity(magnetization_array, dx, dy, self.length_units).T
-        self.colout_plot.set_array(skyrmion_density_array)
+        self.colour_plot.set_array(skyrmion_density_array)
 
     def _update_quiver_array(self, full_file):
 

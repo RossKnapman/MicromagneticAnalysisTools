@@ -7,7 +7,7 @@ import pytest
 
 
 def test_magnetizationQuiver():
-    magnetization_plotter = Plot.MagnetizationPlotter('quiver', 'tests/data', 'm000000.ovf')
+    magnetization_plotter = Plot.MagnetizationPlotter('quiveronly', 'tests/data', 'm000000.ovf')
     magnetization_plotter.plot()
 
 

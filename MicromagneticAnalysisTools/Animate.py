@@ -201,15 +201,11 @@ class MagnetizationAnimator:
             time_text_x = self.limits[0]
             time_text_y = 1.1 * (self.limits[3] - self.limits[2]) + self.limits[2]
 
-            print(file_text_x)
-
             if length_units:
                 file_text_x /= 1e9*length_units
                 file_text_y /= 1e9*length_units
                 time_text_x /= 1e9*length_units
                 time_text_y /= 1e9*length_units
-
-            print(file_text_x)
 
             self.file_text = self.ax.text(file_text_x, file_text_y, "")
             self.time_text = self.ax.text(time_text_x, time_text_y, "")

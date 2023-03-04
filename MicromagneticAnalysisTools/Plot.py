@@ -160,6 +160,11 @@ class MagnetizationPlotter:
         max_skyrmion_density(float64, optional): The maximum skyrmion number density to be plotted (corresponds to vmax and -vmin in `imshow`).
         step (int, optional): For the quiver plot, how many cells should be skipped between points.
         quiver_colour (List[float64], optional): List of form `[R, G, B]` for colour of arrows.
+        quiver_scale (float64, optional): scale option for matplotlib.pyplot.quiver.
+        quiver_headwidth (float64, optional): headwidth option for matplotlib.pyplot.quiver.
+        quiver_headlength (float64, optional): headlength option for matplotlib.pyplot.quiver.
+        quiver_headaxislength (float64, optional): headaxislength option for matplotlib.pyplot.quiver.
+        quiver_headlinewidth (float64, optional): headlinewidth option for matplotlib.pyplot.quiver.
     
     """
 
@@ -179,7 +184,12 @@ class MagnetizationPlotter:
     length_units=None,
     max_skyrmion_density=None,
     step=1,
-    quiver_colour=[0, 0, 0]):
+    quiver_colour=[0, 0, 0],
+    quiver_scale=3.,
+    quiver_headwidth=10,
+    quiver_headlength=20,
+    quiver_headaxislength=20,
+    quiver_linewidth=5):
         self.plot_type = plot_type
         self.directory = directory
         self.plot_file = plot_file
@@ -196,6 +206,11 @@ class MagnetizationPlotter:
         self.max_skyrmion_density = max_skyrmion_density
         self.step = step 
         self.quiver_colour = quiver_colour
+        self.quiver_scale = quiver_scale
+        self.quiver_headwidth = quiver_headwidth
+        self.quiver_headlength = quiver_headlength
+        self.quiver_headaxislength = quiver_headaxislength
+        self.quiver_linewidth = quiver_linewidth
 
         self.Lx, self.Ly = Read.sampleExtent(self.directory)
         self.m_array = df.Field.fromfile(self.directory + '/' + self.plot_file).array
@@ -287,7 +302,8 @@ class MagnetizationPlotter:
         colour_array = self._get_quiver_colour_array(magnetization_array)
         self.quiver_plot = self.ax.quiver(Y.T, X.T, magnetization_array[:, :, 0].T / in_plane_magnitude,
             magnetization_array[:, :, 1].T / in_plane_magnitude, color=colour_array, units='xy', scale_units='xy', pivot='mid',
-            headwidth=6, headlength=10, headaxislength=10, linewidth=5)
+            scale=self.quiver_scale, headwidth=self.quiver_headwidth, headlength=self.quiver_headlength, headaxislength=self.quiver_headaxislength,
+            linewidth=self.quiver_linewidth)
 
     def _plot_impurity(self):
         impurity_array = np.flip(getImpurityArray(self.directory, np.array([0, 1, 0, 0.2]), self.z_index)[

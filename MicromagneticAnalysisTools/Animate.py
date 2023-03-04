@@ -122,11 +122,16 @@ class MagnetizationAnimator:
     limits=None,
     length_units=None,
     step=1,
-    quiver_colour=[1., 1., 1.],
     start_file = None,
     end_file = None,
     rectangle_fracs = None,
-    out_name = None):
+    out_name = None,
+    quiver_colour = [1., 1., 1.],
+    quiver_scale = 1.,
+    quiver_headwidth = 6,
+    quiver_headlength = 10,
+    quiver_headaxislength = 10,
+    quiver_linewidth = 5):
         self.plot_type = plot_type
         self.directory = directory
         self.fig = fig
@@ -144,11 +149,16 @@ class MagnetizationAnimator:
         self.limits = limits
         self.length_units  = length_units
         self.step = step
-        self.quiver_colour = quiver_colour
         self.start_file = start_file
         self.end_file = end_file
         self.rectangle_fracs = rectangle_fracs
         self.out_name = out_name
+        self.quiver_colour = quiver_colour
+        self.quiver_scale = quiver_scale
+        self.quiver_headwidth = quiver_headwidth
+        self.quiver_headlength = quiver_headlength
+        self.quiver_headaxislength = quiver_headaxislength
+        self.quiver_linewidth = quiver_linewidth
 
         self.files_to_scan = Read.getFilesToScan(self.directory, self.start_file, self.end_file)
         assert len(self.files_to_scan) != 0
@@ -176,7 +186,9 @@ class MagnetizationAnimator:
         ax=self.ax, z_index=self.z_index, component=self.component, plot_quiver=self.plot_quiver, 
         plot_impurity=self.plot_impurity, plot_pinning=self.plot_pinning, show_component=self.show_component,
         interpolation=self.interpolation, limits=self.limits, length_units=self.length_units, step=self.step,
-        quiver_colour=self.quiver_colour)
+        quiver_colour=self.quiver_colour, quiver_scale=self.quiver_scale, quiver_headwidth=self.quiver_headwidth,
+        quiver_headlength=self.quiver_headlength, quiver_headaxislength=quiver_headaxislength,
+        quiver_linewidth=self.quiver_linewidth)
 
         if self.plot_quiver:
             if plot_type == 'quiveronly':
